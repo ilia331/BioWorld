@@ -1,0 +1,18 @@
+# Тайни — никога не се качват в GitHub
+.env
+.env.local
+.env.*.local
+
+# Пакети и временни файлове
+node_modules/
+coverage/
+dist/
+
+# Системни файлове
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Редактори
+.vscode/
+.idea/

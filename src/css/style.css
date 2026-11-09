@@ -1,0 +1,87 @@
+/* BioWorld — начални стилове (седмица 1).
+   Цветовете са събрани в променливи, за да се сменят лесно на едно място. */
+:root {
+  --green-dark: #2f6b4f;
+  --green-light: #e8f5e1;
+  --background: #eef3ee;
+  --text: #223;
+  --muted: #667;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.top-bar {
+  background: var(--green-dark);
+  color: #fff;
+  padding: 16px;
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* Съдържанието е в една колона и не е по-широко от 900px */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.note {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.mission-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.mission-list li {
+  background: var(--green-light);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 16px;
+}
+
+/* По-широк екран: мисиите са в няколко колони */
+@media (min-width: 700px) {
+  .mission-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

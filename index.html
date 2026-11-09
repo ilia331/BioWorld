@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport: без него телефонът показва страницата смалена -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioWorld — Долината на равновесието</title>
+  <link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+  <header class="top-bar">
+    <h1>BioWorld</h1>
+    <p class="subtitle">Долината на равновесието</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Как се играе</h2>
+      <ol>
+        <li>Всяка мисия трае 10 хода. На всеки ход избираш едно действие.</li>
+        <li>Преди хода правиш прогноза. След хода я сравняваш с резултата.</li>
+        <li>„Дневникът на причините“ обяснява защо се е променила долината.</li>
+      </ol>
+      <p class="note">Това е опростен учебен модел, а не научна прогноза за истинска екосистема.</p>
+    </section>
+
+    <section class="card">
+      <h2>Мисии</h2>
+      <!-- Картите на мисиите ще се добавят от main.js в стъпка 3 -->
+      <ul id="mission-list" class="mission-list"></ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Училищен проект · 10. клас · <span id="status">зареждане…</span></p>
+  </footer>
+
+  <!-- defer: скриптът се пуска, след като HTML-ът е зареден -->
+  <script src="src/js/main.js" defer></script>
+</body>
+</html>
