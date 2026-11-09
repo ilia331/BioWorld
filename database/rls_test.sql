@@ -12,11 +12,18 @@
 -- Всички редове трябва да са ✅.
 -- =====================================================================
 
--- 0. Има ли поне двама потребители?
+-- 0. Готова ли е базата за теста?
 do $$
 begin
+  if (select count(*) from public.species) <> 3
+     or (select count(*) from public.ecosystems) <> 5 then
+    raise exception 'Липсват тестовите данни (3 вида и 5 мисии). Първо пусни seed.sql.';
+  end if;
   if (select count(*) from auth.users) < 2 then
     raise exception 'Нужни са поне 2 потребителя: Authentication → Users → Add user.';
+  end if;
+  if (select count(*) from public.profiles) < 2 then
+    raise exception 'Потребителите нямат профили. Пусни отново долната част на schema.sql (раздел 2).';
   end if;
 end $$;
 
