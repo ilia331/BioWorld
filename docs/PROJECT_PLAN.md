@@ -92,16 +92,18 @@ BioWorld/
 **Паралелна работа в седмица 1:** стъпки 1 и 2 се правят едновременно заради краткия срок. Всеки пише в собствените си файлове (Ученик 1 — RESEARCH.md; Ученик 2 — PROJECT_PLAN.md, GAME_DESIGN.md, ER_DIAGRAM.md, ISSUES.md, mockups/), за да няма конфликти.
 
 ### Предаване за първия етап (чеклист)
-- [ ] docs/RESEARCH.md (стъпка 1)
-- [x] docs/PROJECT_PLAN.md — чернова, чака преглед от Ученик 1
-- [x] docs/GAME_DESIGN.md — чернова, чака преглед
-- [x] Два макета (docs/mockups/) — чернова, чака преглед
-- [x] Начална ER диаграма (docs/ER_DIAGRAM.md) — чернова, чака преглед
-- [ ] 12 GitHub Issues — текстът е в docs/ISSUES.md, трябва да се създадат в GitHub
-- [ ] README.md с имената на двамата
-- [ ] Начални index.html, style.css, script.js
-- [ ] Поне по един личен commit от всеки
-- [ ] WEEK_1_REPORT.md (общо + два индивидуални отчета)
+- [x] docs/RESEARCH.md (стъпка 1)
+- [x] docs/PROJECT_PLAN.md
+- [x] docs/GAME_DESIGN.md
+- [x] Два макета в docs/mockups/
+- [x] ER диаграма в docs/ER_DIAGRAM.md
+- [x] 12 GitHub Issues — създадени, с отговорници и етикети
+- [x] README.md с имената на двамата
+- [x] Начални index.html, src/css/style.css и src/js/main.js
+- [x] Поне по един commit от профила на всеки ученик
+- [x] WEEK_1_REPORT.md — обща част и два индивидуални раздела
+
+**Преди предаване:** Илия трябва да впише конкретния въпрос, който твърди, че е задал за RESEARCH.md. Прегледът на стъпка 2 от Павел е направен с помощта на ИИ; в PR #13 няма формален review от него. Личното разбиране на двамата не може да се потвърди само от отметките.
 
 ## 6. Как работим с Git и Issues
 
