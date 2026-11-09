@@ -1,6 +1,12 @@
 # BioWorld — Начална ER диаграма
 
-**Статус:** начален проект (стъпка 2). Таблиците още **не са създадени** в Supabase. Ще се реализират в `database/schema.sql` в стъпка 4 и могат да се променят.
+**Статус:** начален проект (стъпка 2). В стъпка 4 моделът е реализиран в [database/schema.sql](../database/schema.sql).
+
+**Промени спрямо началния проект (стъпка 4):**
+- `species` има колона `code` (`grass`, `rabbit`, `fox`) — кратко име, което JavaScript кодът ще използва.
+- `simulations` и `simulation_history` имат `created_at`.
+- `species` и `ecosystems` се четат **и без вход**, за да се виждат мисиите на първия екран (виж таблицата с права по-долу).
+- Изигран ход в `simulation_history` не може да се променя — само се добавя.
 
 ## Диаграма
 
@@ -25,6 +31,7 @@ erDiagram
     }
     SPECIES {
         uuid id PK
+        text code UK "grass, rabbit, fox"
         text name UK "трева, заек, лисица"
         text role "plant / herbivore / predator"
         int max_count "> 0"
@@ -89,9 +96,10 @@ erDiagram
 | Таблица | Четене | Писане |
 | --- | --- | --- |
 | profiles | само собственият профил | само собственият профил |
-| species, ecosystems | всички влезли потребители | никой от приложението (само администратор) |
+| species, ecosystems | всички, и без вход | никой от приложението (само администратор) |
 | simulations | само ако `user_id = auth.uid()` | само ако `user_id = auth.uid()` |
-| populations, simulation_history | само ако играта е на `auth.uid()` | само ако играта е на `auth.uid()` |
+| populations | само ако играта е на `auth.uid()` | добавяне и промяна, само ако играта е на `auth.uid()` |
+| simulation_history | само ако играта е на `auth.uid()` | само добавяне, ако играта е на `auth.uid()` |
 
 Проверка в стъпка 4: два тестови акаунта. Акаунт Б **не трябва** да вижда игрите на акаунт А.
 
