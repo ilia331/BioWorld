@@ -43,6 +43,7 @@ select set_config('request.jwt.claims',
 do $$
 declare
   v_sim uuid;
+  n     integer;
 begin
   -- А създава игра по мисия 1, популации и един ход в историята
   insert into public.simulations (ecosystem_id, water)
@@ -59,10 +60,12 @@ begin
   perform set_config('test.r01', (select count(*) from public.simulations where id = v_sim)::text, false);
   perform set_config('test.r02', (select count(*) from public.populations where simulation_id = v_sim)::text, false);
 
-  -- А се опитва да поправи изигран ход (историята е само за добавяне)
+  -- А се опитва да поправи изигран ход (историята е само за добавяне).
+  -- „Отказано“ е и грешка за права, и 0 променени реда — и в двата случая нищо не се променя.
   begin
     update public.simulation_history set reason = 'поправено' where simulation_id = v_sim;
-    perform set_config('test.r03', 'позволено', false);
+    get diagnostics n = row_count;
+    perform set_config('test.r03', case when n = 0 then 'отказано' else 'позволено' end, false);
   exception when insufficient_privilege then
     perform set_config('test.r03', 'отказано', false);
   end;
@@ -138,9 +141,11 @@ select set_config('request.jwt.claims', '{"role": "anon"}', false);
 do $$
 begin
   perform set_config('test.r13', (select count(*) from public.ecosystems)::text, false);
+  -- В този момент в базата има игра на Б. Посетителят не трябва да я види:
+  -- 0 видени реда или грешка за права — и двете означават „отказано“.
   begin
-    perform 1 from public.simulations limit 1;
-    perform set_config('test.r14', 'позволено', false);
+    perform set_config('test.r14',
+      case when (select count(*) from public.simulations) = 0 then 'отказано' else 'позволено' end, false);
   exception when insufficient_privilege then
     perform set_config('test.r14', 'отказано', false);
   end;

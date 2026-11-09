@@ -132,8 +132,14 @@ on conflict (id) do nothing;
 
 -- Първо: кои роли изобщо имат достъп до таблиците.
 -- anon = посетител без вход; authenticated = влязъл ученик.
+-- Supabase по подразбиране дава ВСИЧКИ права на всяка нова таблица,
+-- затова първо ги отнемаме (revoke) и после даваме само нужните (grant).
 -- RLS политиките по-долу ограничават този достъп до конкретни редове.
-grant select                         on public.species, public.ecosystems to anon, authenticated;
+-- (Този блок може да се пусне отделно и повторно — не изтрива данни.)
+revoke all on public.profiles, public.species, public.ecosystems, public.simulations,
+              public.populations, public.simulation_history
+  from anon, authenticated;
+grant select                        on public.species, public.ecosystems to anon, authenticated;
 grant select, update                 on public.profiles                   to authenticated;
 grant select, insert, update, delete on public.simulations                to authenticated;
 grant select, insert, update         on public.populations                to authenticated;
