@@ -6,7 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BioWorld — Долината на равновесието</title>
   <link rel="stylesheet" href="src/css/style.css">
+  <!-- Библиотеката на Supabase (вход и запис). Без интернет играта работи, но не записва. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" defer></script>
+  <!-- Редът е важен: правила → алгоритъм → мисии → запис → интерфейс -->
   <script src="src/js/actionRules.js" defer></script>
+  <script src="src/js/simulation.js" defer></script>
+  <script src="src/js/missions.js" defer></script>
+  <script src="src/js/storage.js" defer></script>
   <script src="src/js/main.js" defer></script>
 </head>
 <body>
@@ -18,13 +24,31 @@
         <p class="subtitle">Долината на равновесието</p>
       </div>
       <div class="account-buttons">
-        <button type="button" disabled title="Ще бъде добавено по-късно">Вход</button>
-        <button type="button" disabled title="Ще бъде добавено по-късно">Регистрация</button>
+        <span id="account-name" class="account-name"></span>
+        <button id="account-button" type="button">Вход / Регистрация</button>
       </div>
     </div>
   </header>
 
   <main class="container">
+    <!-- Вход и регистрация (стъпка 6). Показва се при натискане на бутона горе. -->
+    <section id="auth-panel" class="card auth-panel" aria-labelledby="auth-title" hidden>
+      <h3 id="auth-title">Вход за записване на напредъка</h3>
+      <p class="small-text">Без вход можеш да играеш, но играта няма да се запише.</p>
+      <form id="auth-form" class="auth-form">
+        <label for="auth-email">Имейл</label>
+        <input id="auth-email" type="email" autocomplete="email" required>
+        <label for="auth-password">Парола (поне 6 знака)</label>
+        <input id="auth-password" type="password" autocomplete="current-password" minlength="6" required>
+        <div class="auth-buttons">
+          <button class="button button-primary" type="submit" data-auth="sign-in">Вход</button>
+          <button class="button button-secondary" type="submit" data-auth="sign-up">Регистрация</button>
+        </div>
+      </form>
+      <button id="sign-out-button" class="button button-secondary" type="button" hidden>Изход</button>
+      <p id="auth-message" class="small-text" role="status"></p>
+    </section>
+
     <!-- Екран 1: правила и избор на мисия -->
     <section id="missions-screen" aria-labelledby="missions-title">
       <div class="intro">
@@ -50,30 +74,31 @@
         <div id="mission-list" class="mission-list"></div>
         <div class="start-actions">
           <button id="start-button" class="button button-primary" type="button">Започни мисия 1 →</button>
-          <button class="button button-secondary" type="button" disabled title="Записването ще бъде добавено по-късно">Продължи</button>
+          <button id="continue-button" class="button button-secondary" type="button" disabled title="Влез, за да продължиш записана игра">Продължи</button>
         </div>
       </section>
     </section>
 
-    <!-- Екран 2: интерфейс с примерни данни; няма изчисляване на ход -->
+    <!-- Екран 2: долината. Ходът се изчислява от simulation.js (стъпка 6). -->
     <section id="game-screen" aria-labelledby="game-title" hidden>
       <div class="game-heading">
         <button id="back-button" class="back-button" type="button">← Към мисиите</button>
-        <span class="turn-badge">Ход 3 / 10 · пример</span>
+        <span id="turn-badge" class="turn-badge">Ход 0 / 10</span>
       </div>
       <h2 id="game-title">Мисия 1: Първи живот</h2>
       <p id="game-goal" class="game-goal">Цел: и трите вида да оцелеят 10 хода.</p>
-      <p class="demo-note">Числата са примерни. Ходовете и изчисленията ще бъдат добавени по-късно.</p>
+      <p id="save-note" class="demo-note">Без вход — играта не се записва.</p>
 
       <section class="metrics" aria-label="Показатели на долината">
-        <div class="metric"><span>💧 Вода</span><strong>48 <small>/ 100</small></strong><span class="change down">−12</span></div>
-        <div class="metric"><span>🌿 Трева</span><strong>212</strong><span class="change up">+12</span></div>
-        <div class="metric"><span>🐇 Зайци</span><strong>24</strong><span class="change up">+4</span></div>
-        <div class="metric"><span>🦊 Лисици</span><strong>4</strong><span class="change same">0</span></div>
+        <!-- main.js попълва числата от симулацията -->
+        <div class="metric" data-metric="water"><span>💧 Вода</span><strong>–</strong><span class="change same">0</span></div>
+        <div class="metric" data-metric="grass"><span>🌿 Трева</span><strong>–</strong><span class="change same">0</span></div>
+        <div class="metric" data-metric="rabbits"><span>🐇 Зайци</span><strong>–</strong><span class="change same">0</span></div>
+        <div class="metric" data-metric="foxes"><span>🦊 Лисици</span><strong>–</strong><span class="change same">0</span></div>
       </section>
 
       <section class="card scene-card" aria-labelledby="scene-title">
-        <div class="section-heading"><h3 id="scene-title">Долината</h3><span class="event-label">☀ Миналия ход: суша</span></div>
+        <div class="section-heading"><h3 id="scene-title">Долината</h3><span id="event-label" class="event-label">Без събитие</span></div>
         <svg class="valley-scene" viewBox="0 0 720 260" role="img" aria-label="Илюстрация на долина с водоем, трева, зайци и лисица">
           <rect width="720" height="260" fill="#d8ecf2"/>
           <circle cx="620" cy="56" r="29" fill="#f6cf76"/>
@@ -105,10 +130,10 @@
           <h3 id="prediction-title">1. Твоята прогноза</h3>
           <p class="small-text">Избери ↑, = или ↓ за всеки показател.</p>
           <div class="prediction-list">
-            <div class="prediction-row"><span>💧 Вода</span><div class="choice-group" role="group" aria-label="Прогноза за водата"><button type="button" aria-pressed="false">↑</button><button type="button" aria-pressed="false">=</button><button type="button" aria-pressed="false">↓</button></div></div>
-            <div class="prediction-row"><span>🌿 Трева</span><div class="choice-group" role="group" aria-label="Прогноза за тревата"><button type="button" aria-pressed="false">↑</button><button type="button" aria-pressed="false">=</button><button type="button" aria-pressed="false">↓</button></div></div>
-            <div class="prediction-row"><span>🐇 Зайци</span><div class="choice-group" role="group" aria-label="Прогноза за зайците"><button type="button" aria-pressed="false">↑</button><button type="button" aria-pressed="false">=</button><button type="button" aria-pressed="false">↓</button></div></div>
-            <div class="prediction-row"><span>🦊 Лисици</span><div class="choice-group" role="group" aria-label="Прогноза за лисиците"><button type="button" aria-pressed="false">↑</button><button type="button" aria-pressed="false">=</button><button type="button" aria-pressed="false">↓</button></div></div>
+            <div class="prediction-row"><span>💧 Вода</span><div class="choice-group" role="group" aria-label="Прогноза за водата" data-key="water"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>🌿 Трева</span><div class="choice-group" role="group" aria-label="Прогноза за тревата" data-key="grass"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>🐇 Зайци</span><div class="choice-group" role="group" aria-label="Прогноза за зайците" data-key="rabbits"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>🦊 Лисици</span><div class="choice-group" role="group" aria-label="Прогноза за лисиците" data-key="foxes"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
           </div>
           <label class="reason-label" for="reason">Защо мислиш така? <span class="small-text">(по желание)</span></label>
           <textarea id="reason" rows="3" placeholder="Например: Засаждам трева и зайците ще имат повече храна."></textarea>
@@ -130,17 +155,19 @@
 
       <div class="next-area">
         <button id="next-button" class="button button-primary" type="button" disabled>Следващ ход →</button>
-        <p id="turn-message" class="small-text" role="status">Избери действие и направи четири прогнози. Ходовете засега не се изчисляват.</p>
+        <p id="turn-message" class="small-text" role="status">Избери действие и направи четири прогнози.</p>
       </div>
       <section class="card" aria-labelledby="state-title">
         <h3 id="state-title">Състояние на екрана</h3>
         <p id="game-state" class="state-banner" data-state="ready" role="status" aria-live="polite">Готово за избор на действие и прогноза.</p>
-        <p class="small-text">Преглед на състоянията в този прототип (без връзка с база данни):</p>
-        <div class="state-actions">
-          <button type="button" data-preview-state="loading">Покажи „Зареждане“</button>
-          <button type="button" data-preview-state="error">Покажи „Грешка“</button>
-          <button type="button" data-preview-state="ready">Върни „Готово“</button>
-        </div>
+      </section>
+
+      <!-- Кратък резултат след 10 хода. Пълният екран с резултат е за стъпка 7. -->
+      <section id="result-card" class="card result-card" aria-labelledby="result-title" hidden>
+        <h3 id="result-title">Резултат</h3>
+        <ul id="result-list" class="result-list"></ul>
+        <p id="result-points" class="small-text"></p>
+        <button id="restart-button" class="button button-primary" type="button">Опитай пак</button>
       </section>
       <div class="history-grid">
         <section class="card" aria-labelledby="chart-title">
@@ -150,9 +177,8 @@
         </section>
         <section class="card" aria-labelledby="diary-title">
           <h3 id="diary-title">📓 Дневник на причините</h3>
-          <p class="small-text">Пример от миналия ход:</p>
-          <p class="diary-example">Суша → по-малко вода (60 → 48) → по-бавен растеж на тревата.</p>
-          <p class="small-text">След работещ ход тук ще сравняваме прогноза и резултат.</p>
+          <!-- main.js показва тук прогнозата, резултата и причините за последния ход -->
+          <div id="diary"><p class="small-text">След първия ход тук ще видиш прогнозата си, резултата и защо долината се е променила.</p></div>
         </section>
       </div>
     </section>

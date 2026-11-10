@@ -200,3 +200,19 @@ textarea { width: 100%; max-width: 100%; min-height: 76px; padding: 10px; border
   .action-list button { flex-wrap: wrap; }
   .next-area { text-align: left; }
 }
+
+/* Стъпка 6: вход, дневник с истински данни и кратък резултат. */
+.account-name { align-self: center; color: #d7ebd9; font-size: .85rem; overflow-wrap: anywhere; }
+.account-buttons button:not(:disabled) { opacity: 1; }
+.auth-form { display: grid; gap: 6px; max-width: 420px; }
+.auth-form input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+.auth-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.auth-panel .small-text[role="status"] { margin-top: 10px; }
+.diary-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .9rem; }
+.diary-table th, .diary-table td { padding: 6px 4px; border-bottom: 1px solid var(--border); text-align: left; }
+.diary-points { margin: 8px 0; font-weight: 700; color: var(--green-dark); }
+.diary-why { margin: 10px 0 4px; font-weight: 700; }
+.diary-reasons { margin: 0; padding-left: 20px; }
+.diary-reasons li { margin-bottom: 4px; }
+.result-list { list-style: none; padding: 0; margin: 0 0 12px; }
+.result-list li { padding: 6px 0; border-bottom: 1px solid var(--border); }
