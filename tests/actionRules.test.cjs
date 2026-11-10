@@ -8,6 +8,7 @@ const source = fs.readFileSync("src/js/actionRules.js", "utf8");
 const context = vm.createContext({});
 vm.runInContext(source, context);
 const actionError = context.actionError;
+const canContinue = context.canContinue;
 
 const normal = {
   water: 48, grass: 212, rabbits: 24, foxes: 4,
@@ -37,4 +38,12 @@ test("зайците и лисиците спазват ограниченият
 test("без намеса е позволено, а непознато действие се отказва", () => {
   assert.equal(actionError("none", { ...normal, water: 0 }), null);
   assert.match(actionError("unknown", normal), /Непознато/);
+});
+
+test("следващият ход иска действие, четири прогнози и готов екран", () => {
+  assert.equal(canContinue(null, 4, "ready"), false);
+  assert.equal(canContinue("none", 3, "ready"), false);
+  assert.equal(canContinue("none", 4, "loading"), false);
+  assert.equal(canContinue("none", 4, "error"), false);
+  assert.equal(canContinue("none", 4, "ready"), true);
 });

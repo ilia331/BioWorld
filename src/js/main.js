@@ -98,8 +98,7 @@ function chooseOne(button, group) {
 function updateNextButton() {
   const actionChosen = document.querySelector('#action-list button[aria-pressed="true"]');
   const predictionCount = document.querySelectorAll('.choice-group button[aria-pressed="true"]').length;
-  const ready = Boolean(actionChosen) && predictionCount === 4;
-  nextButton.disabled = !ready || gameState.dataset.state !== "ready";
+  nextButton.disabled = !canContinue(actionChosen, predictionCount, gameState.dataset.state);
 
   if (gameState.dataset.state === "error") return;
   if (!actionChosen) {

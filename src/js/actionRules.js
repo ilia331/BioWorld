@@ -28,3 +28,8 @@ function actionError(action, state) {
   if (action === "none") return null;
   return "Непознато действие.";
 }
+
+// Ходът може да се поиска само след действие и четири прогнози.
+function canContinue(actionChosen, predictionCount, screenState) {
+  return Boolean(actionChosen) && predictionCount === 4 && screenState === "ready";
+}
