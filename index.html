@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BioWorld — Долината на равновесието</title>
   <link rel="stylesheet" href="src/css/style.css">
+  <script src="src/js/actionRules.js" defer></script>
   <script src="src/js/main.js" defer></script>
 </head>
 <body>
@@ -114,15 +115,16 @@
         </section>
         <section class="card" aria-labelledby="actions-title">
           <h3 id="actions-title">2. Избери действие</h3>
-          <p class="small-text">Едно действие за всеки ход.</p>
+          <p class="small-text">Едно действие за всеки ход. Недостъпните действия показват причината.</p>
           <div id="action-list" class="action-list" role="group" aria-label="Действия">
-            <button type="button" aria-pressed="false"><span>🌿 Засади трева</span><small>−10 вода</small></button>
-            <button type="button" aria-pressed="false"><span>💧 Възстанови водоем</span><small>остават 2 / 2</small></button>
-            <button type="button" aria-pressed="false"><span>🐇 Добави зайци</span><small>остават 3 / 3</small></button>
-            <button type="button" disabled title="Използвано 2 пъти"><span>🦊 Добави лисици</span><small>остават 0 / 2</small></button>
-            <button type="button" aria-pressed="false"><span>✋ Без намеса</span><small>безплатно</small></button>
+            <button type="button" data-action="plant-grass" aria-pressed="false"><span>🌿 Засади трева</span><small>−10 вода</small></button>
+            <button type="button" data-action="restore-water" aria-pressed="false"><span>💧 Възстанови водоем</span><small>остават 2 / 2</small></button>
+            <button type="button" data-action="add-rabbits" aria-pressed="false"><span>🐇 Добави зайци</span><small>остават 3 / 3</small></button>
+            <button type="button" data-action="add-foxes" aria-pressed="false"><span>🦊 Добави лисици</span><small>остават 0 / 2</small></button>
+            <button type="button" data-action="none" aria-pressed="false"><span>✋ Без намеса</span><small>безплатно</small></button>
           </div>
-          <p class="small-text">Лисиците не са налични в този пример: действието е използвано 2 пъти.</p>
+          <p id="action-reasons" class="action-reason">Добави лисици: действието вече е използвано 2 от 2 пъти в тази мисия.</p>
+          <p id="action-message" class="small-text" role="status">Още няма избрано действие.</p>
         </section>
       </div>
 
@@ -130,6 +132,16 @@
         <button id="next-button" class="button button-primary" type="button" disabled>Следващ ход →</button>
         <p id="turn-message" class="small-text" role="status">Избери действие и направи четири прогнози. Ходовете засега не се изчисляват.</p>
       </div>
+      <section class="card" aria-labelledby="state-title">
+        <h3 id="state-title">Състояние на екрана</h3>
+        <p id="game-state" class="state-banner" data-state="ready" role="status" aria-live="polite">Готово за избор на действие и прогноза.</p>
+        <p class="small-text">Преглед на състоянията в този прототип (без връзка с база данни):</p>
+        <div class="state-actions">
+          <button type="button" data-preview-state="loading">Покажи „Зареждане“</button>
+          <button type="button" data-preview-state="error">Покажи „Грешка“</button>
+          <button type="button" data-preview-state="ready">Върни „Готово“</button>
+        </div>
+      </section>
       <div class="history-grid">
         <section class="card" aria-labelledby="chart-title">
           <h3 id="chart-title">Графика по ходове</h3>
