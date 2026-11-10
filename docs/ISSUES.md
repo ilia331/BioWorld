@@ -1,30 +1,31 @@
-# BioWorld — 12 GitHub Issues (за създаване)
+# BioWorld — 12 GitHub Issues
 
-**Статус:** това са **текстове**, подготвени за създаване в GitHub (раздел *Issues → New issue*). Още не са създадени в хранилището.
-След създаването заменете „Ученик 1“ и „Ученик 2“ с GitHub имената си (поле *Assignees*) и отбележете номерата им тук.
+**Статус към 09.11.2026:** Issues #1–#12 са създадени в GitHub. Отговорниците и етикетите от таблицата са зададени в самите Issues. За актуалния статус на всяка задача гледайте [GitHub Issues](https://github.com/ilia331/BioWorld/issues).
 
-**Предложени етикети (Labels):** `docs`, `design`, `frontend`, `database`, `algorithm`, `testing`, `week-1` … `week-5`
+**Използвани етикети (Labels):** `docs`, `design`, `frontend`, `database`, `algorithm`, `testing`, `week-1` … `week-5`
 
-**Разпределение:** 6 задачи за Ученик 1, 6 задачи за Ученик 2, по реда на стъпките с редуване.
+**Разпределение:** 6 задачи за Павел (`5avkata`), 6 задачи за Илия (`ilia331`), по реда на стъпките с редуване.
 
 | # | Заглавие | Стъпка | Отговорник | Етикети |
 | --- | --- | --- | --- | --- |
-| 1 | Проучване и RESEARCH.md | 1 | Ученик 1 | docs, week-1 |
-| 2 | План, игрови дизайн и ER диаграма | 2 | Ученик 2 | docs, design, week-1 |
-| 3 | Два макета на екраните | 2 | Ученик 2 | design, week-1 |
-| 4 | Начална структура, README и WEEK_1_REPORT | 1–2 | Ученик 1 | docs, week-1 |
-| 5 | HTML/CSS екрани, навигация и мобилен изглед | 3 | Ученик 1 | frontend, week-2 |
-| 6 | database/schema.sql, тестови данни и RLS | 4 | Ученик 2 | database, week-2 |
-| 7 | Игрови екран: избор и проверка на действия | 5 | Ученик 1 | frontend, week-3 |
-| 8 | Собствен алгоритъм за един ход | 6 | Ученик 2 | algorithm, week-3 |
-| 9 | Мисия 1 с 10 хода, запис/зареждане и тестове | 6 | Ученик 2 | algorithm, database, testing, week-4 |
-| 10 | Мисии 2–5, графика и „Дневник на причините“ | 7 | Ученик 1 | frontend, week-4 |
-| 11 | Екран с резултат и проверка на телефон с потребител | 7 | Ученик 1 | frontend, testing, week-5 |
-| 12 | Интеграция, проверка на права, демо и презентация | 8 | Ученик 2 | testing, docs, week-5 |
+| [1](https://github.com/ilia331/BioWorld/issues/1) | Проучване и RESEARCH.md | 1 | Павел | docs, week-1 |
+| [2](https://github.com/ilia331/BioWorld/issues/2) | План, игрови дизайн и ER диаграма | 2 | Илия | docs, design, week-1 |
+| [3](https://github.com/ilia331/BioWorld/issues/3) | Два макета на екраните | 2 | Илия | design, week-1 |
+| [4](https://github.com/ilia331/BioWorld/issues/4) | Начална структура, README и WEEK_1_REPORT | 1–2 | Павел | docs, week-1 |
+| [5](https://github.com/ilia331/BioWorld/issues/5) | HTML/CSS екрани, навигация и мобилен изглед | 3 | Павел | frontend, week-2 |
+| [6](https://github.com/ilia331/BioWorld/issues/6) | database/schema.sql, тестови данни и RLS | 4 | Илия | database, week-2 |
+| [7](https://github.com/ilia331/BioWorld/issues/7) | Игрови екран: избор и проверка на действия | 5 | Павел | frontend, week-3 |
+| [8](https://github.com/ilia331/BioWorld/issues/8) | Собствен алгоритъм за един ход | 6 | Илия | algorithm, week-3 |
+| [9](https://github.com/ilia331/BioWorld/issues/9) | Мисия 1 с 10 хода, запис/зареждане и тестове | 6 | Илия | algorithm, database, testing, week-4 |
+| [10](https://github.com/ilia331/BioWorld/issues/10) | Мисии 2–5, графика и „Дневник на причините“ | 7 | Павел | frontend, week-4 |
+| [11](https://github.com/ilia331/BioWorld/issues/11) | Екран с резултат и проверка на телефон с потребител | 7 | Павел | frontend, testing, week-5 |
+| [12](https://github.com/ilia331/BioWorld/issues/12) | Интеграция, проверка на права, демо и презентация | 8 | Илия | testing, docs, week-5 |
 
 ---
 
-## Текстове за копиране
+## Първоначални текстове на задачите
+
+Отметките по-долу са част от първоначалния шаблон, а не текущ статус. Актуалните отметки са в GitHub Issues.
 
 ### 1. Проучване и RESEARCH.md
 **Описание:** Да се опишат проблемът, целевата група (6.–9. клас) и три сходни решения: PhET Natural Selection, The Habitable Planet — Ecology Lab, Eco.
