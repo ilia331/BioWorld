@@ -171,8 +171,15 @@ textarea { width: 100%; max-width: 100%; min-height: 76px; padding: 10px; border
 .action-list button[aria-pressed="true"] { border-color: var(--green); background: var(--green-light); }
 .action-list button:disabled { background: #ebefeb; color: #6b746c; }
 .action-list small { color: var(--muted); white-space: nowrap; }
+.action-reason { margin: 8px 0; padding: 10px; border-radius: 8px; background: #fff0e8; color: #864b2a; font-size: .88rem; }
 .next-area { margin: 0 0 22px; text-align: right; }
 .next-area .small-text { margin-top: 8px; }
+.state-banner { margin: 0 0 12px; padding: 12px; border-radius: 9px; background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+.state-banner[data-state="loading"] { background: #eef3fa; color: #31557b; }
+.state-banner[data-state="error"] { background: #fff0e8; color: #864b2a; }
+.state-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.state-actions button { padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: white; }
+.state-actions button:hover { border-color: var(--green); }
 .placeholder-chart { min-height: 140px; display: flex; align-items: end; justify-content: space-between; padding: 16px; border-left: 2px solid #b7c9b9; border-bottom: 2px solid #b7c9b9; background: repeating-linear-gradient(to top, transparent 0, transparent 33px, #eaf0e8 34px); color: var(--muted); }
 .diary-example { padding: 12px; border-radius: 8px; background: var(--green-light); }
 .footer { padding: 20px; color: var(--muted); font-size: .85rem; text-align: center; }
