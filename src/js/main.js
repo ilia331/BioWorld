@@ -453,7 +453,7 @@ signOutButton.addEventListener("click", async () => {
 
 showMissions();
 renderActions();
-document.getElementById("status").textContent = "стъпка 6 · работещ ход";
+document.getElementById("status").textContent = "стъпка 7 · пет мисии и графика";
 
 storageReady = initStorage();
 if (storageReady) {
