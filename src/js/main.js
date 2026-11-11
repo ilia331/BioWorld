@@ -192,14 +192,15 @@ function renderGame(previous) {
 // Сцената показва същите числа като показателите, без отделна симулация.
 function renderScene(state) {
   const scene = document.getElementById("valley-scene");
-  document.getElementById("scene-river").style.opacity = String(.2 + state.water / 100 * .8);
+  document.getElementById("scene-river").style.opacity = String(state.water / 100);
+  document.getElementById("scene-shimmer").style.opacity = String(state.water / 100);
   document.getElementById("scene-grass").style.opacity = String(.2 + state.grass / 500 * .8);
-  document.getElementById("scene-rabbits").hidden = state.rabbits === 0;
-  document.getElementById("scene-more-rabbits").hidden = state.rabbits < 35;
-  document.getElementById("scene-foxes").hidden = state.foxes === 0;
-  document.getElementById("scene-more-foxes").hidden = state.foxes < 10;
+  document.getElementById("scene-rabbits").style.display = state.rabbits === 0 ? "none" : "";
+  document.getElementById("scene-more-rabbits").style.display = state.rabbits < 35 ? "none" : "";
+  document.getElementById("scene-foxes").style.display = state.foxes === 0 ? "none" : "";
+  document.getElementById("scene-more-foxes").style.display = state.foxes < 10 ? "none" : "";
   const event = game.entries.at(-1)?.event.type || "none";
-  document.getElementById("scene-rain").hidden = event !== "rain";
+  document.getElementById("scene-rain").style.display = event === "rain" ? "" : "none";
   scene.dataset.event = event;
   scene.setAttribute("aria-label", `Долина: вода ${state.water}, трева ${state.grass}, зайци ${state.rabbits}, лисици ${state.foxes}.`);
   document.getElementById("scene-caption").textContent =
