@@ -266,6 +266,13 @@ function showResult() {
   }
   document.getElementById("result-title").textContent = result.success ? "🎉 Мисията е успешна!" : "Мисията не е успешна";
   document.getElementById("result-mission").textContent = `Мисия ${game.mission.number}: ${game.mission.title}`;
+  const resources = document.getElementById("result-resources");
+  resources.innerHTML = "";
+  for (const key of ["water", "grass", "rabbits", "foxes"]) {
+    const item = document.createElement("span");
+    item.textContent = `${LABELS[key]}: ${game.state[key]}`;
+    resources.append(item);
+  }
   document.getElementById("result-points").textContent =
     `Точки за разбиране: ${game.points || 0} от 40. Те са отделни от успеха на мисията.`;
   const turns = document.getElementById("key-turns");

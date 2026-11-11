@@ -328,6 +328,8 @@ body { background: radial-gradient(circle at 80% 8%, #dce9cf 0, transparent 35%)
 .diary-turn summary { padding: 9px; background: #e8eee0; border-radius: 8px; }
 .result-card { padding: clamp(20px,4vw,42px); background: #f8f8ed; }
 .result-card > h2 { font-size: clamp(2.3rem,5vw,4rem); }
+.result-resources { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin: 12px 0 20px; }
+.result-resources span { padding: 12px; border-radius: 10px; background: #e4eee1; font-weight: 800; text-align: center; }
 .result-reflection { border-radius: 0 12px 12px 0; }
 
 @media (max-width: 900px) {
@@ -352,6 +354,7 @@ body { background: radial-gradient(circle at 80% 8%, #dce9cf 0, transparent 35%)
   .metric strong { font-size: 1.4rem; }
   .phase-bar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
   .phase-bar span { font-size: .75rem; }
+  .result-resources { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .game-heading { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
