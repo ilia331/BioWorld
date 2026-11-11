@@ -8,11 +8,13 @@
   <link rel="stylesheet" href="src/css/style.css">
   <!-- Библиотеката на Supabase (вход и запис). Без интернет играта работи, но не записва. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script>
   <!-- Редът е важен: правила → алгоритъм → мисии → запис → интерфейс -->
   <script src="src/js/actionRules.js" defer></script>
   <script src="src/js/simulation.js" defer></script>
   <script src="src/js/missions.js" defer></script>
   <script src="src/js/storage.js" defer></script>
+  <script src="src/js/historyChart.js" defer></script>
   <script src="src/js/main.js" defer></script>
 </head>
 <body>
@@ -68,7 +70,7 @@
       <section aria-labelledby="mission-list-title">
         <div class="section-heading">
           <div><p class="eyebrow">Пет предизвикателства</p><h3 id="mission-list-title">Избери мисия</h3></div>
-          <p class="small-text">Първите три мисии могат да се разгледат. Останалите са заключени.</p>
+          <p class="small-text">Всичките пет мисии са достъпни. Започни с първата или избери предизвикателство.</p>
         </div>
         <!-- main.js добавя петте карти тук -->
         <div id="mission-list" class="mission-list"></div>
@@ -162,24 +164,39 @@
         <p id="game-state" class="state-banner" data-state="ready" role="status" aria-live="polite">Готово за избор на действие и прогноза.</p>
       </section>
 
-      <!-- Кратък резултат след 10 хода. Пълният екран с резултат е за стъпка 7. -->
-      <section id="result-card" class="card result-card" aria-labelledby="result-title" hidden>
-        <h3 id="result-title">Резултат</h3>
-        <ul id="result-list" class="result-list"></ul>
-        <p id="result-points" class="small-text"></p>
-        <button id="restart-button" class="button button-primary" type="button">Опитай пак</button>
-      </section>
       <div class="history-grid">
         <section class="card" aria-labelledby="chart-title">
           <h3 id="chart-title">Графика по ходове</h3>
-          <div class="placeholder-chart" aria-label="Място за бъдеща графика"><span>0</span><span>1</span><span>2</span><span>3</span><span>…</span><span>10</span></div>
-          <p class="small-text">Тук ще се появи графика на четирите показателя.</p>
+          <div class="chart-box"><canvas id="history-chart" role="img" aria-label="Графика на вода, трева, зайци и лисици по ходове"></canvas></div>
+          <p class="small-text">Линиите показват процент от максимума за всеки показател. Задръж върху точка за точния брой.</p>
+          <p id="chart-message" class="small-text" role="status"></p>
         </section>
         <section class="card" aria-labelledby="diary-title">
           <h3 id="diary-title">📓 Дневник на причините</h3>
           <!-- main.js показва тук прогнозата, резултата и причините за последния ход -->
           <div id="diary"><p class="small-text">След първия ход тук ще видиш прогнозата си, резултата и защо долината се е променила.</p></div>
         </section>
+      </div>
+    </section>
+
+    <!-- Екран 3: резултатът се показва след десетия ход. -->
+    <section id="result-screen" aria-labelledby="result-title" hidden>
+      <div class="card result-card">
+        <p class="eyebrow">Край на мисията</p>
+        <h2 id="result-title">Резултат</h2>
+        <p id="result-mission" class="small-text"></p>
+        <ul id="result-list" class="result-list"></ul>
+        <p id="result-points" class="result-points"></p>
+        <h3>Ключови ходове</h3>
+        <ol id="key-turns"></ol>
+        <p id="reflection-question" class="result-reflection"></p>
+        <h3>Как се променя долината</h3>
+        <div class="chart-box"><canvas id="result-chart" role="img" aria-label="Графика на показателите за десетте хода"></canvas></div>
+        <p id="result-chart-message" class="small-text" role="status"></p>
+        <div class="start-actions">
+          <button id="restart-button" class="button button-primary" type="button">Опитай пак</button>
+          <button id="result-back-button" class="button button-secondary" type="button">Към мисиите</button>
+        </div>
       </div>
     </section>
   </main>

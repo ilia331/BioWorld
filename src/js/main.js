@@ -4,6 +4,7 @@
 const missionList = document.getElementById("mission-list");
 const missionsScreen = document.getElementById("missions-screen");
 const gameScreen = document.getElementById("game-screen");
+const resultScreen = document.getElementById("result-screen");
 const startButton = document.getElementById("start-button");
 const continueButton = document.getElementById("continue-button");
 const backButton = document.getElementById("back-button");
@@ -69,18 +70,20 @@ function selectMission(mission, card) {
 function showScreen(screen) {
   missionsScreen.hidden = screen !== "missions";
   gameScreen.hidden = screen !== "game";
+  resultScreen.hidden = screen !== "result";
   window.scrollTo(0, 0);
 }
 
 // ---------- Започване и продължаване на игра ----------
 
-function openGame(mission, state, history, simulationId) {
-  game = { mission, state, history, simulationId };
+function openGame(mission, state, history, simulationId, entries = []) {
+  game = { mission, state, history, simulationId, entries,
+    points: entries.reduce((sum, entry) => sum + entry.comparison.points, 0) };
   document.getElementById("game-title").textContent = `Мисия ${mission.number}: ${mission.title}`;
   document.getElementById("game-goal").textContent = `Цел: ${mission.goalText}`;
-  document.getElementById("result-card").hidden = true;
   showScreen("game");
   renderGame(null);
+  renderDiary();
   resetChoices();
   backButton.focus();
 }
@@ -88,8 +91,6 @@ function openGame(mission, state, history, simulationId) {
 async function startMission(mission) {
   const state = createInitialState(mission);
   openGame(mission, state, [state], null);
-  diary.innerHTML = "";
-  diary.append(paragraph("След първия ход тук ще видиш прогнозата си, резултата и защо долината се е променила.", "small-text"));
   if (!user) return;
 
   setGameState("loading", "Създаване на нова игра в базата…");
@@ -113,12 +114,15 @@ async function continueGame() {
     }
     const mission = MISSIONS.find((m) => m.number === saved.missionNumber);
     const history = [createInitialState(mission), ...saved.history];
-    openGame(mission, saved.state, history, saved.id);
+    const entries = saved.entries.map((row, index) => ({
+      turn: row.turn_no,
+      comparison: comparePrediction(history[index], history[index + 1], row.prediction || {}),
+      reasons: [row.reason || "Няма записана причина."],
+      event: { type: row.event || "none" },
+      before: history[index], after: history[index + 1],
+    }));
+    openGame(mission, saved.state, history, saved.id, entries);
     saveNote.textContent = `Продължаваш записана игра от ход ${saved.state.turn}.`;
-    if (saved.lastEntry) {
-      diary.innerHTML = "";
-      diary.append(paragraph(`Последен записан ход ${saved.lastEntry.turn_no}: ${saved.lastEntry.reason}`));
-    }
   } catch (error) {
     setAuthMessage("Грешка при зареждане: " + error.message);
   }
@@ -127,6 +131,11 @@ async function continueGame() {
 startButton.addEventListener("click", () => startMission(selectedMission));
 continueButton.addEventListener("click", continueGame);
 document.getElementById("restart-button").addEventListener("click", () => startMission(game.mission));
+document.getElementById("result-back-button").addEventListener("click", () => {
+  showScreen("missions");
+  refreshContinueButton();
+  startButton.focus();
+});
 
 backButton.addEventListener("click", () => {
   showScreen("missions");
@@ -164,6 +173,8 @@ function renderGame(previous) {
     actionList.querySelector(`[data-action="${action}"] small`).textContent = text;
   }
   renderActions();
+  const drawn = drawHistoryChart(document.getElementById("history-chart"), game.history);
+  document.getElementById("chart-message").textContent = drawn ? "" : "Графиката изисква интернет връзка.";
 }
 
 function paragraph(text, className) {
@@ -173,38 +184,46 @@ function paragraph(text, className) {
   return p;
 }
 
-// „Дневник на причините“: прогноза срещу резултат + причините.
-function renderDiary(turn, comparison, reasons, event) {
+// Показва всички ходове, като последният е отворен най-отгоре.
+function renderDiary() {
   diary.innerHTML = "";
-  diary.append(paragraph(`Ход ${turn} · ${EVENT_NAMES[event.type]}`, "small-text"));
-
-  const table = document.createElement("table");
-  table.className = "diary-table";
-  const head = table.insertRow();
-  for (const title of ["Показател", "Прогноза", "Резултат", ""]) {
-    const th = document.createElement("th");
-    th.textContent = title;
-    head.append(th);
+  if (game.entries.length === 0) {
+    diary.append(paragraph("След първия ход тук ще видиш прогнозата, резултата и причините.", "small-text"));
+    return;
   }
-  for (const d of comparison.details) {
-    const row = table.insertRow();
-    const before = game.history[game.history.length - 2][d.key];
-    const after = game.state[d.key];
-    for (const text of [LABELS[d.key], ARROWS[d.predicted], `${before} → ${after} ${ARROWS[d.actual]}`, d.ok ? "✓" : "✗"]) {
-      row.insertCell().textContent = text;
+  for (const entry of [...game.entries].reverse()) {
+    const section = document.createElement("details");
+    section.className = "diary-turn";
+    section.open = entry === game.entries[game.entries.length - 1];
+    const summary = document.createElement("summary");
+    summary.textContent = `Ход ${entry.turn} · ${EVENT_NAMES[entry.event.type]} · ${entry.comparison.points} / 4 точки`;
+    section.append(summary);
+    const table = document.createElement("table");
+    table.className = "diary-table";
+    const head = table.insertRow();
+    for (const title of ["Показател", "Прогноза", "Резултат", ""]) {
+      const th = document.createElement("th");
+      th.textContent = title;
+      head.append(th);
     }
+    for (const d of entry.comparison.details) {
+      const row = table.insertRow();
+      for (const value of [LABELS[d.key], ARROWS[d.predicted] || "?",
+        `${entry.before[d.key]} → ${entry.after[d.key]} ${ARROWS[d.actual]}`, d.ok ? "✓" : "✗"]) {
+        row.insertCell().textContent = value;
+      }
+    }
+    section.append(table);
+    const list = document.createElement("ul");
+    list.className = "diary-reasons";
+    for (const reason of entry.reasons) {
+      const li = document.createElement("li");
+      li.textContent = reason;
+      list.append(li);
+    }
+    section.append(paragraph("Защо?", "diary-why"), list);
+    diary.append(section);
   }
-  diary.append(table);
-  diary.append(paragraph(`Точки за разбиране: ${comparison.points} / 4`, "diary-points"));
-
-  const list = document.createElement("ul");
-  list.className = "diary-reasons";
-  for (const reason of reasons) {
-    const li = document.createElement("li");
-    li.textContent = reason;
-    list.append(li);
-  }
-  diary.append(paragraph("Защо?", "diary-why"), list);
 }
 
 function showResult() {
@@ -217,9 +236,21 @@ function showResult() {
     list.append(li);
   }
   document.getElementById("result-title").textContent = result.success ? "🎉 Мисията е успешна!" : "Мисията не е успешна";
+  document.getElementById("result-mission").textContent = `Мисия ${game.mission.number}: ${game.mission.title}`;
   document.getElementById("result-points").textContent =
-    `Точки за разбиране: ${game.points || 0} от 40. Помисли: кой ход промени долината най-много и защо?`;
-  document.getElementById("result-card").hidden = false;
+    `Точки за разбиране: ${game.points || 0} от 40. Те са отделни от успеха на мисията.`;
+  const turns = document.getElementById("key-turns");
+  turns.innerHTML = "";
+  for (const entry of keyDecisions(game.entries)) {
+    const li = document.createElement("li");
+    li.textContent = `Ход ${entry.turn}: ${entry.reasons[0]}`;
+    turns.append(li);
+  }
+  document.getElementById("reflection-question").textContent =
+    "Помисли: кое твое действие промени долината най-силно? Какво би избрал различно при следващ опит?";
+  showScreen("result");
+  const drawn = drawHistoryChart(document.getElementById("result-chart"), game.history);
+  document.getElementById("result-chart-message").textContent = drawn ? "" : "Графиката изисква интернет връзка.";
   setGameState("ready", "Мисията приключи след 10 хода.");
   nextButton.disabled = true;
   return result;
@@ -321,9 +352,11 @@ nextButton.addEventListener("click", async () => {
   game.history.push(result.state);
   const comparison = comparePrediction(previous, result.state, prediction);
   game.points = (game.points || 0) + comparison.points;
+  game.entries.push({ turn: result.state.turn, comparison, reasons: result.reasons,
+    event: result.event, before: previous, after: result.state });
 
   renderGame(previous);
-  renderDiary(result.state.turn, comparison, result.reasons, result.event);
+  renderDiary();
   resetChoices();
   turnMessage.textContent = `Ход ${result.state.turn} е изигран. Виж „Дневника на причините“ по-долу.`;
 

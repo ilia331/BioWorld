@@ -216,3 +216,19 @@ textarea { width: 100%; max-width: 100%; min-height: 76px; padding: 10px; border
 .diary-reasons li { margin-bottom: 4px; }
 .result-list { list-style: none; padding: 0; margin: 0 0 12px; }
 .result-list li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+
+/* Стъпка 7: графика, дневник за всички ходове и отделен резултат. */
+.chart-box { position: relative; width: 100%; height: 300px; margin: 12px 0; }
+.diary-turn { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.diary-turn summary { cursor: pointer; font-weight: 700; color: var(--green-dark); }
+.diary-turn .diary-table { margin-top: 12px; }
+.result-card { max-width: 900px; margin: 0 auto; }
+.result-card .eyebrow { color: var(--green); }
+.result-points { padding: 12px; border-radius: 9px; background: var(--green-light); font-weight: 700; }
+.result-reflection { padding: 12px; border-left: 4px solid #d3a345; background: #fff8e8; }
+
+@media (max-width: 700px) {
+  .chart-box { height: 260px; }
+  .diary-table { font-size: .78rem; }
+  .diary-table th, .diary-table td { padding: 6px 2px; }
+}
