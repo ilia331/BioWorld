@@ -2,11 +2,13 @@
 // Изчисленията са в simulation.js, мисиите — в missions.js, записът — в storage.js.
 
 const missionList = document.getElementById("mission-list");
+const homeScreen = document.getElementById("home-screen");
 const missionsScreen = document.getElementById("missions-screen");
 const gameScreen = document.getElementById("game-screen");
 const resultScreen = document.getElementById("result-screen");
 const startButton = document.getElementById("start-button");
 const continueButton = document.getElementById("continue-button");
+const homeContinueButton = document.getElementById("home-continue");
 const backButton = document.getElementById("back-button");
 const nextButton = document.getElementById("next-button");
 const turnMessage = document.getElementById("turn-message");
@@ -26,6 +28,9 @@ let user = null;
 const LABELS = { water: "💧 Вода", grass: "🌿 Трева", rabbits: "🐇 Зайци", foxes: "🦊 Лисици" };
 const ARROWS = { up: "↑", same: "=", down: "↓" };
 const EVENT_NAMES = { none: "Без събитие", rain: "🌧 Дъжд", drought: "☀ Суша", disease: "🦠 Болест" };
+
+// Подреждаме действията преди прогнозите и за клавиатурата.
+document.querySelector(".controls-grid").prepend(document.querySelector('[aria-labelledby="actions-title"]'));
 
 // ---------- Екран 1: мисии ----------
 
@@ -68,11 +73,16 @@ function selectMission(mission, card) {
 }
 
 function showScreen(screen) {
+  homeScreen.hidden = screen !== "home";
   missionsScreen.hidden = screen !== "missions";
   gameScreen.hidden = screen !== "game";
   resultScreen.hidden = screen !== "result";
   window.scrollTo(0, 0);
 }
+
+document.getElementById("home-start").addEventListener("click", () => showScreen("missions"));
+document.getElementById("home-missions").addEventListener("click", () => showScreen("missions"));
+document.getElementById("missions-home").addEventListener("click", () => showScreen("home"));
 
 // ---------- Започване и продължаване на игра ----------
 
@@ -130,6 +140,7 @@ async function continueGame() {
 
 startButton.addEventListener("click", () => startMission(selectedMission));
 continueButton.addEventListener("click", continueGame);
+homeContinueButton.addEventListener("click", continueGame);
 document.getElementById("restart-button").addEventListener("click", () => startMission(game.mission));
 document.getElementById("result-back-button").addEventListener("click", () => {
   showScreen("missions");
@@ -165,16 +176,34 @@ function renderGame(previous) {
 
   // Оставащи използвания на действията.
   const left = {
-    "restore-water": `остават ${2 - s.waterUses} / 2`,
-    "add-rabbits": `остават ${3 - s.rabbitUses} / 3`,
-    "add-foxes": `остават ${2 - s.foxUses} / 2`,
+    "restore-water": `+25 вода · остават ${2 - s.waterUses} / 2`,
+    "add-rabbits": `+6 зайци · остават ${3 - s.rabbitUses} / 3`,
+    "add-foxes": `+2 лисици · остават ${2 - s.foxUses} / 2`,
   };
   for (const [action, text] of Object.entries(left)) {
     actionList.querySelector(`[data-action="${action}"] small`).textContent = text;
   }
   renderActions();
+  renderScene(s);
   const drawn = drawHistoryChart(document.getElementById("history-chart"), game.history);
   document.getElementById("chart-message").textContent = drawn ? "" : "Графиката изисква интернет връзка.";
+}
+
+// Сцената показва същите числа като показателите, без отделна симулация.
+function renderScene(state) {
+  const scene = document.getElementById("valley-scene");
+  document.getElementById("scene-river").style.opacity = String(.2 + state.water / 100 * .8);
+  document.getElementById("scene-grass").style.opacity = String(.2 + state.grass / 500 * .8);
+  document.getElementById("scene-rabbits").hidden = state.rabbits === 0;
+  document.getElementById("scene-more-rabbits").hidden = state.rabbits < 35;
+  document.getElementById("scene-foxes").hidden = state.foxes === 0;
+  document.getElementById("scene-more-foxes").hidden = state.foxes < 10;
+  const event = game.entries.at(-1)?.event.type || "none";
+  document.getElementById("scene-rain").hidden = event !== "rain";
+  scene.dataset.event = event;
+  scene.setAttribute("aria-label", `Долина: вода ${state.water}, трева ${state.grass}, зайци ${state.rabbits}, лисици ${state.foxes}.`);
+  document.getElementById("scene-caption").textContent =
+    `Вода ${state.water} · Трева ${state.grass} · Зайци ${state.rabbits} · Лисици ${state.foxes}`;
 }
 
 function paragraph(text, className) {
@@ -274,6 +303,7 @@ function updateNextButton() {
   const predictionCount = document.querySelectorAll('.choice-group button[aria-pressed="true"]').length;
   const finished = game && game.state.turn >= 10;
   nextButton.disabled = finished || !canContinue(actionChosen, predictionCount, gameState.dataset.state);
+  document.querySelector(".phase-bar").dataset.phase = !actionChosen ? "action" : predictionCount < 4 ? "prediction" : "execute";
 
   if (gameState.dataset.state === "error" || finished) return;
   if (!actionChosen) {
@@ -389,10 +419,12 @@ function setAuthMessage(text) {
 
 async function refreshContinueButton() {
   continueButton.disabled = true;
+  homeContinueButton.disabled = true;
   if (!user) return;
   try {
     const saved = await loadLatestGame();
     continueButton.disabled = !saved;
+    homeContinueButton.disabled = !saved;
     continueButton.title = saved ? `Мисия ${saved.missionNumber}, ход ${saved.state.turn}` : "Няма незавършена игра";
   } catch (error) {
     continueButton.title = "Грешка: " + error.message;
@@ -453,6 +485,7 @@ signOutButton.addEventListener("click", async () => {
 
 showMissions();
 renderActions();
+showScreen("home");
 document.getElementById("status").textContent = "стъпка 7 · пет мисии и графика";
 
 storageReady = initStorage();

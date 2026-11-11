@@ -51,22 +51,48 @@
       <p id="auth-message" class="small-text" role="status"></p>
     </section>
 
-    <!-- Екран 1: правила и избор на мисия -->
-    <section id="missions-screen" aria-labelledby="missions-title">
-      <div class="intro">
-        <p class="eyebrow">Избери своя път</p>
-        <h2 id="missions-title">Малките решения променят цялата долина.</h2>
-        <p>Имаш 10 хода, за да запазиш природния баланс. Предвиждай какво ще стане и научи защо се е случило.</p>
+    <!-- Начално меню: първо показва играта, после води към избор на мисия. -->
+    <section id="home-screen" aria-labelledby="home-title">
+      <div class="home-hero">
+        <div class="home-copy">
+          <p class="eyebrow">Стратегическа игра за живия свят</p>
+          <h2 id="home-title">Една долина.<br><em>Всяко решение има последици.</em></h2>
+          <p>Управлявай водата, тревата, зайците и лисиците. Предвиди как ще се промени природата и запази равновесието за 10 хода.</p>
+          <div class="home-actions">
+            <button id="home-start" class="button button-primary" type="button">Започни игра →</button>
+            <button id="home-continue" class="button button-secondary" type="button" disabled>Продължи игра</button>
+          </div>
+          <p class="home-promise">5 мисии · 10 хода · всяко решение променя долината</p>
+        </div>
+        <img class="home-art" src="assets/valley-hero.svg" alt="Илюстрирана речна долина с гора, вода, зайци и лисица">
       </div>
-      <section class="card" aria-labelledby="rules-title">
-        <h3 id="rules-title">Как се играе</h3>
+      <div class="home-bottom">
+        <div class="loop-steps" aria-label="Как се играе">
+          <span><b>01</b> Избери действие</span><span><b>02</b> Направи прогноза</span>
+          <span><b>03</b> Изиграй ход</span><span><b>04</b> Разбери защо</span>
+        </div>
+        <button id="home-missions" class="text-button" type="button">Разгледай мисиите →</button>
+      </div>
+      <p class="note">Опростен учебен модел на екосистема, а не научна прогноза.</p>
+    </section>
+
+    <!-- Екран 1: избор на мисия -->
+    <section id="missions-screen" aria-labelledby="missions-title" hidden>
+      <div class="intro">
+        <button id="missions-home" class="back-button" type="button">← Начално меню</button>
+        <p class="eyebrow">Карта на долината</p>
+        <h2 id="missions-title">Избери предизвикателство.</h2>
+        <p>Всяка мисия променя началните условия и природните събития. Един и същ свят, пет различни истории.</p>
+      </div>
+      <details class="card rules-panel" aria-labelledby="rules-title">
+        <summary id="rules-title">Как се играе? <span>Кратки правила</span></summary>
         <ol class="rules-list">
           <li>На всеки ход избираш едно действие: трева, водоем, зайци, лисици или без намеса.</li>
           <li>Преди хода предвиждаш дали водата и популациите ще се увеличат, запазят или намалеят.</li>
           <li>След хода сравняваш прогнозата с резултата в „Дневника на причините“.</li>
         </ol>
         <p class="note">Това е опростен учебен модел, а не научна прогноза за истинска екосистема.</p>
-      </section>
+      </details>
       <section aria-labelledby="mission-list-title">
         <div class="section-heading">
           <div><p class="eyebrow">Пет предизвикателства</p><h3 id="mission-list-title">Избери мисия</h3></div>
@@ -101,35 +127,44 @@
 
       <section class="card scene-card" aria-labelledby="scene-title">
         <div class="section-heading"><h3 id="scene-title">Долината</h3><span id="event-label" class="event-label">Без събитие</span></div>
-        <svg class="valley-scene" viewBox="0 0 720 260" role="img" aria-label="Илюстрация на долина с водоем, трева, зайци и лисица">
+        <svg id="valley-scene" class="valley-scene" viewBox="0 0 720 260" role="img" aria-label="Илюстрация на долина с водоем, трева, зайци и лисица">
           <rect width="720" height="260" fill="#d8ecf2"/>
           <circle cx="620" cy="56" r="29" fill="#f6cf76"/>
           <path d="M0 145 Q130 65 260 140 T520 126 T720 142 V260 H0Z" fill="#a8c6a0"/>
           <path d="M0 185 Q160 125 340 185 T720 170 V260 H0Z" fill="#79a87d"/>
-          <path d="M32 220 Q190 171 345 215 Q420 244 324 260 H40Z" fill="#6aafc4"/>
+          <path id="scene-river" d="M32 220 Q190 171 345 215 Q420 244 324 260 H40Z" fill="#6aafc4"/>
           <path d="M50 225 Q185 190 312 221" fill="none" stroke="#b9e1e9" stroke-width="5"/>
-          <g fill="none" stroke="#315d3f" stroke-width="5" stroke-linecap="round">
+          <g id="scene-grass" fill="none" stroke="#315d3f" stroke-width="5" stroke-linecap="round">
             <path d="M405 215 l-6 -19 m6 19 l9 -23 M455 228 l-7 -23 m7 23 l9 -16 M518 209 l-5 -18 m5 18 l8 -21"/>
             <path d="M579 230 l-5 -20 m5 20 l11 -24 M663 213 l-4 -17 m4 17 l9 -19"/>
           </g>
-          <g fill="#efe8da" stroke="#9b8673" stroke-width="3">
+          <g id="scene-rabbits" fill="#efe8da" stroke="#9b8673" stroke-width="3">
             <ellipse cx="445" cy="195" rx="27" ry="16"/><circle cx="466" cy="181" r="13"/>
             <ellipse cx="550" cy="208" rx="25" ry="15"/><circle cx="571" cy="194" r="12"/>
             <ellipse cx="460" cy="157" rx="5" ry="18"/><ellipse cx="470" cy="158" rx="5" ry="18"/>
             <ellipse cx="566" cy="171" rx="5" ry="17"/><ellipse cx="577" cy="172" rx="5" ry="17"/>
           </g>
-          <g fill="#bd714e" stroke="#714c3c" stroke-width="3">
+          <use id="scene-more-rabbits" href="#scene-rabbits" transform="translate(-115 18) scale(.85)"/>
+          <g id="scene-foxes" fill="#bd714e" stroke="#714c3c" stroke-width="3">
             <path d="M611 204 l24 -25 45 12 20 25 -39 12 -43 -5Z"/>
             <path d="M622 199 l-14 -20 27 8 M672 192 l8 -21 11 25"/>
           </g>
+          <use id="scene-more-foxes" href="#scene-foxes" transform="translate(-145 12) scale(.82)"/>
           <circle cx="685" cy="200" r="3" fill="#26352e"/>
+          <g id="scene-rain" stroke="#d6f2f3" stroke-width="4" stroke-linecap="round" hidden>
+            <path d="m90 52-8 22m83-37-8 22m83 4-8 22m88-44-8 22m82-12-8 22m91-36-8 22m91 14-8 22m84-51-8 22"/>
+          </g>
         </svg>
-        <p class="small-text">Илюстрацията е символична. Точните стойности са в показателите и графиката.</p>
+        <p id="scene-caption" class="small-text">Състоянието на долината следва стойностите на показателите.</p>
       </section>
+
+      <div class="phase-bar" aria-label="Последователност на хода">
+        <span>01 Действие</span><span>02 Прогноза</span><span>03 Ход</span><span>04 Последици</span>
+      </div>
 
       <div class="controls-grid">
         <section class="card" aria-labelledby="prediction-title">
-          <h3 id="prediction-title">1. Твоята прогноза</h3>
+          <h3 id="prediction-title">2. Твоята прогноза</h3>
           <p class="small-text">Избери ↑, = или ↓ за всеки показател.</p>
           <div class="prediction-list">
             <div class="prediction-row"><span>💧 Вода</span><div class="choice-group" role="group" aria-label="Прогноза за водата" data-key="water"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
@@ -141,13 +176,13 @@
           <textarea id="reason" rows="3" placeholder="Например: Засаждам трева и зайците ще имат повече храна."></textarea>
         </section>
         <section class="card" aria-labelledby="actions-title">
-          <h3 id="actions-title">2. Избери действие</h3>
+          <h3 id="actions-title">1. Избери действие</h3>
           <p class="small-text">Едно действие за всеки ход. Недостъпните действия показват причината.</p>
           <div id="action-list" class="action-list" role="group" aria-label="Действия">
-            <button type="button" data-action="plant-grass" aria-pressed="false"><span>🌿 Засади трева</span><small>−10 вода</small></button>
-            <button type="button" data-action="restore-water" aria-pressed="false"><span>💧 Възстанови водоем</span><small>остават 2 / 2</small></button>
-            <button type="button" data-action="add-rabbits" aria-pressed="false"><span>🐇 Добави зайци</span><small>остават 3 / 3</small></button>
-            <button type="button" data-action="add-foxes" aria-pressed="false"><span>🦊 Добави лисици</span><small>остават 0 / 2</small></button>
+            <button type="button" data-action="plant-grass" aria-pressed="false"><span>🌿 Засади трева</span><small>+50 трева · −10 вода</small></button>
+            <button type="button" data-action="restore-water" aria-pressed="false"><span>💧 Възстанови водоем</span><small>+25 вода · остават 2 / 2</small></button>
+            <button type="button" data-action="add-rabbits" aria-pressed="false"><span>🐇 Добави зайци</span><small>+6 зайци · остават 3 / 3</small></button>
+            <button type="button" data-action="add-foxes" aria-pressed="false"><span>🦊 Добави лисици</span><small>+2 лисици · остават 0 / 2</small></button>
             <button type="button" data-action="none" aria-pressed="false"><span>✋ Без намеса</span><small>безплатно</small></button>
           </div>
           <p id="action-reasons" class="action-reason">Добави лисици: действието вече е използвано 2 от 2 пъти в тази мисия.</p>
