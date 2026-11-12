@@ -241,3 +241,15 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
 }
 @media (max-width:380px) { .mission-detail-copy h3 { font-size:2.1rem; }.metric strong { font-size:.82rem; }.metric > span:first-child { font-size:.58rem; }.top-bar .subtitle { letter-spacing:0; } }
 @media (prefers-reduced-motion:reduce) { .scene-clouds,.river-motion,.animal-motion { animation:none !important; } * { scroll-behavior:auto !important; transition-duration:.01ms !important; } }
+
+/* 3D долина (scene3d.js): лежи точно върху SVG сцената и заема нейното място. */
+.scene-tools { display:flex; align-items:center; gap:6px; }
+.view-toggle { min-width:38px; padding:5px 9px; color:#fff0cf; background:#143e38c9; border:1px solid #9ebc97; border-radius:5px; font-size:.76rem; font-weight:800; letter-spacing:.08em; }
+.view-toggle[data-mode="3d"] { color:#183a31; background:#f0c774; border-color:#f0c774; }
+.valley-3d { position:absolute; inset:0; z-index:1; overflow:hidden; background:#5d8c96; }
+/* Мека винетка: насочва погледа към центъра. CSS е безплатен и на телефон (без post-processing). */
+.valley-3d::after { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(6,24,21,.38) 100%); }
+.valley-3d canvas { display:block; width:100%; height:100%; cursor:grab; }
+.scene3d-tip { position:absolute; z-index:3; display:flex; align-items:flex-start; gap:7px; width:230px; margin:0; padding:9px 11px; color:#f7efd2; background:#102e2af2; border:1px solid #d7bb7c; border-radius:7px; font-size:.78rem; line-height:1.3; box-shadow:0 10px 26px #031917aa; pointer-events:none; }
+@media (max-width:700px) { .view-toggle { font-size:.66rem; padding:4px 7px; } .scene-tools .event-label { font-size:.66rem; } .scene3d-tip { width:200px; font-size:.7rem; padding:7px 9px; } }
+.scene3d-fps { position:absolute; z-index:3; right:10px; bottom:38px; padding:3px 7px; border-radius:4px; color:#f0c774; background:#0c2725d9; font:700 .7rem/1.2 monospace; }
