@@ -67,7 +67,7 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
 .rules-panel[open] { width:min(360px,calc(100vw - 30px)); padding-bottom:12px; }
 .rules-panel .rules-list { padding-right:16px; font-size:.78rem; line-height:1.35; }
 .rules-panel .note { padding:0 14px; color:#c6d8bf; font-size:.75rem; }
-.mission-map { display:grid; grid-template-columns:minmax(240px,300px) minmax(0,1fr); gap:20px; height:calc(100dvh - 210px); min-height:460px; }
+.mission-map { display:grid; grid-template-columns:minmax(240px,300px) minmax(0,1fr); gap:20px; height:calc(100dvh - 260px); min-height:410px; }
 .mission-path { min-width:0; padding:15px; border:1px solid #476b58; border-radius:12px; background:#0c2a27e8; }
 .mission-path h3 { margin:0 0 12px; color:#c8d8ba; font-size:.76rem; text-transform:uppercase; letter-spacing:.12em; }
 .mission-list { display:flex; flex-direction:column; gap:4px; }
@@ -135,15 +135,15 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
 .phase-bar span { padding:7px 2px; color:#b6cbbb; background:#285347; border:1px solid #56816a; border-radius:4px; font-size:.62rem; letter-spacing:.03em; }
 .phase-bar span:first-child, .phase-bar[data-phase="prediction"] span:nth-child(2), .phase-bar[data-phase="execute"] span:nth-child(3) { color:#1b392f; background:#e9c47a; border-color:#f7dd9d; }
 .phase-bar[data-phase="prediction"] span:first-child, .phase-bar[data-phase="execute"] span:first-child { color:#b6cbbb; background:#285347; border-color:#56816a; }
-.controls-grid { display:block; min-height:0; }
+.controls-grid { display:block; min-height:0; flex-shrink:0; }
 .controls-grid > .card { min-height:0; margin:0; padding:0; color:#f2ecd4; background:transparent; border:0; border-radius:0; box-shadow:none; }
 .controls-grid h3 { margin:5px 0 4px; color:#fff0c6; font-size:1.33rem; line-height:1.15; }
 .controls-grid .small-text { color:#bad2c0; font-size:.79rem; }
-#game-screen[data-phase="action"] #prediction-panel, #game-screen[data-phase="feedback"] .controls-grid, #game-screen[data-phase="feedback"] .next-area { display:none; }
+#game-screen[data-phase="action"] #prediction-panel, #game-screen[data-phase="action"] .next-area, #game-screen[data-phase="feedback"] .controls-grid, #game-screen[data-phase="feedback"] .next-area { display:none; }
 #game-screen[data-phase="action"] .selected-action { display:none; }
 #game-screen[data-phase="prediction"] #action-panel .action-list, #game-screen[data-phase="prediction"] #action-panel > .small-text, #game-screen[data-phase="prediction"] #action-reasons, #game-screen[data-phase="prediction"] #action-message { display:none; }
-#game-screen[data-phase="prediction"] #action-panel { margin-bottom:13px; padding-bottom:13px; border-bottom:1px solid #668874; }
-#game-screen[data-phase="prediction"] #action-panel h3 { font-size:.9rem; margin:4px 0; }
+#game-screen[data-phase="prediction"] #action-panel { margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #668874; }
+#game-screen[data-phase="prediction"] #action-panel .console-kicker, #game-screen[data-phase="prediction"] #action-panel h3 { display:none; }
 .selected-action { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:8px 10px; color:#ffe0a1; background:#315b46; border:1px solid #a7a67b; border-radius:5px; font-size:.81rem; font-weight:800; }
 .selected-action button { flex:none; border:0; color:#f3e1ad; background:none; font-size:.75rem; }
 .action-list { display:grid; gap:6px; margin:12px 0 8px; }
@@ -157,6 +157,7 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
 .action-list button:disabled { color:#9bad9f; background:#263c36; border-color:#456455; cursor:not-allowed; }
 .action-list button:disabled small { color:#9bad9f; }
 .action-reason { margin:7px 0 0; padding:7px 9px; color:#f9cd9b; background:#543f31; border-radius:5px; font-size:.71rem; }
+#action-reasons:empty { display:none; }
 #action-reasons:not(:empty) { max-height:49px; overflow:auto; }
 #action-message { margin:6px 0 0; }
 .prediction-list { margin:9px 0; }
@@ -167,11 +168,12 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
 .reason-details { margin:8px 0; color:#c3d6be; font-size:.76rem; }
 .reason-details summary { cursor:pointer; }
 .reason-details textarea { min-height:50px; margin-top:5px; color:#f5eed6; background:#10332f; border:1px solid #77917a; }
-.next-area { margin:auto 0 0; padding:12px 0 0; text-align:center; }
+.next-area { flex-shrink:0; margin:auto 0 0; padding:12px 0 0; text-align:center; }
 .next-area .button { width:100%; min-height:48px; font-size:.89rem; }
 .next-area .small-text { margin-top:7px; min-height:20px; font-size:.72rem; }
 .console-status { margin-top:6px; }
 .state-banner { margin:0; padding:5px; color:#c5d9be; background:transparent; font-size:.68rem; font-weight:500; text-align:center; }
+.state-banner[data-state="ready"] { display:none; }
 .state-banner[data-state="error"] { color:#ffd29e; background:#583e32; }
 .state-banner[data-state="loading"] { color:#b8dcee; background:#234253; }
 .game-dock { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:45px; padding:5px 18px; background:#0b2726; border-top:1px solid #789072; }

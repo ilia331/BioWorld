@@ -48,7 +48,8 @@ function showMissions() {
 
     const number = document.createElement("span");
     number.className = "mission-number";
-    number.textContent = mission.locked ? `🔒 Мисия ${mission.number}` : `Мисия ${mission.number}`;
+    number.textContent = mission.locked ? "🔒" : String(mission.number).padStart(2, "0");
+    if (mission.locked) card.title = "Мисията е заключена.";
     const title = document.createElement("strong");
     title.textContent = mission.title;
     const goal = document.createElement("span");
@@ -373,7 +374,7 @@ function renderActions() {
       button.removeAttribute("aria-describedby");
     }
   }
-  actionReasons.textContent = reasons.join(" ") || "Всички действия са достъпни.";
+  actionReasons.textContent = reasons.join(" ");
   updateNextButton();
 }
 
