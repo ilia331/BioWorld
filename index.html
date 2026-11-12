@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BioWorld — Долината на равновесието</title>
   <link rel="stylesheet" href="src/css/style.css">
+  <link rel="stylesheet" href="src/css/game.css">
   <!-- Библиотеката на Supabase (вход и запис). Без интернет играта работи, но не записва. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script>
@@ -20,10 +21,9 @@
 <body>
   <header class="top-bar">
     <div class="top-bar-inner">
-      <div>
-        <p class="eyebrow">Образователна игра за екосистеми</p>
-        <h1>BioWorld</h1>
-        <p class="subtitle">Долината на равновесието</p>
+      <div class="brand-mark">
+        <span class="brand-symbol" aria-hidden="true">◈</span>
+        <div><h1>BioWorld</h1><p class="subtitle">Долината на равновесието</p></div>
       </div>
       <div class="account-buttons">
         <span id="account-name" class="account-name"></span>
@@ -51,38 +51,34 @@
       <p id="auth-message" class="small-text" role="status"></p>
     </section>
 
-    <!-- Начално меню: първо показва играта, после води към избор на мисия. -->
+    <!-- Начално меню: голямата долина е фонът на самата игра. -->
     <section id="home-screen" aria-labelledby="home-title">
       <div class="home-hero">
+        <img class="home-art" src="assets/valley-menu.svg" alt="Илюстрирана речна долина с гора, вода, зайци и лисица">
+        <div class="home-vignette" aria-hidden="true"></div>
         <div class="home-copy">
-          <p class="eyebrow">Стратегическа игра за живия свят</p>
-          <h2 id="home-title">Една долина.<br><em>Всяко решение има последици.</em></h2>
-          <p>Управлявай водата, тревата, зайците и лисиците. Предвиди как ще се промени природата и запази равновесието за 10 хода.</p>
-          <div class="home-actions">
-            <button id="home-start" class="button button-primary" type="button">Започни игра →</button>
-            <button id="home-continue" class="button button-secondary" type="button" disabled>Продължи игра</button>
-          </div>
-          <p class="home-promise">5 мисии · 10 хода · всяко решение променя долината</p>
+          <span class="menu-kicker">ПАЗИТЕЛ НА ДОЛИНАТА · 5 МИСИИ</span>
+          <h2 id="home-title">Животът в долината<br><em>е в твоите ръце.</em></h2>
+          <p>Вода. Трева. Зайци. Лисици. Един жив свят, който се променя с всеки твой ход.</p>
+          <nav class="home-actions" aria-label="Главно меню">
+            <button id="home-start" class="menu-play" type="button">▶ ИГРАЙ</button>
+            <button id="home-missions" class="menu-option" type="button">Избор на мисия <span aria-hidden="true">↗</span></button>
+            <button id="home-continue" class="menu-option" type="button" disabled>Продължи <span aria-hidden="true">↗</span></button>
+            <button id="home-rules" class="menu-option" type="button">Как се играе <span aria-hidden="true">↗</span></button>
+          </nav>
         </div>
-        <img class="home-art" src="assets/valley-hero.svg" alt="Илюстрирана речна долина с гора, вода, зайци и лисица">
+        <div class="home-corner">10 ХОДА <span>·</span> 4 РЕСУРСА <span>·</span> 1 ДОЛИНА</div>
       </div>
-      <div class="home-bottom">
-        <div class="loop-steps" aria-label="Как се играе">
-          <span><b>01</b> Избери действие</span><span><b>02</b> Направи прогноза</span>
-          <span><b>03</b> Изиграй ход</span><span><b>04</b> Разбери защо</span>
-        </div>
-        <button id="home-missions" class="text-button" type="button">Разгледай мисиите →</button>
-      </div>
-      <p class="note">Опростен учебен модел на екосистема, а не научна прогноза.</p>
+      <details id="home-help" class="home-help"><summary>Как работи долината?</summary><p>Избери действие, предвиди четирите промени и изиграй хода. После виж причините в дневника. Моделът е опростен учебен пример, а не научна прогноза.</p></details>
     </section>
 
     <!-- Екран 1: избор на мисия -->
     <section id="missions-screen" aria-labelledby="missions-title" hidden>
       <div class="intro">
         <button id="missions-home" class="back-button" type="button">← Начално меню</button>
-        <p class="eyebrow">Карта на долината</p>
-        <h2 id="missions-title">Избери предизвикателство.</h2>
-        <p>Всяка мисия променя началните условия и природните събития. Един и същ свят, пет различни истории.</p>
+        <p class="eyebrow">ПЪТЕКАТА НА ПАЗИТЕЛЯ</p>
+        <h2 id="missions-title">Избери мисия</h2>
+        <p>Пет изпитания за една жива долина.</p>
       </div>
       <details class="card rules-panel" aria-labelledby="rules-title">
         <summary id="rules-title">Как се играе? <span>Кратки правила</span></summary>
@@ -93,98 +89,98 @@
         </ol>
         <p class="note">Това е опростен учебен модел, а не научна прогноза за истинска екосистема.</p>
       </details>
-      <section aria-labelledby="mission-list-title">
-        <div class="section-heading">
-          <div><p class="eyebrow">Пет предизвикателства</p><h3 id="mission-list-title">Избери мисия</h3></div>
-          <p class="small-text">Всичките пет мисии са достъпни. Започни с първата или избери предизвикателство.</p>
-        </div>
-        <!-- main.js добавя петте карти тук -->
-        <div id="mission-list" class="mission-list"></div>
-        <div class="start-actions">
-          <button id="start-button" class="button button-primary" type="button">Започни мисия 1 →</button>
-          <button id="continue-button" class="button button-secondary" type="button" disabled title="Влез, за да продължиш записана игра">Продължи</button>
+      <section class="mission-map" aria-labelledby="mission-list-title">
+        <div class="mission-path"><h3 id="mission-list-title">Маршрут през долината</h3><div id="mission-list" class="mission-list"></div></div>
+        <div id="mission-detail" class="mission-detail" data-mission="1">
+          <div class="mission-detail-sky"><span id="mission-detail-number">01 / 05</span><span id="mission-detail-level">Трудност: 1 / 3</span></div>
+          <div class="mission-detail-copy"><span class="eyebrow">ТЕКУЩО ПРЕДИЗВИКАТЕЛСТВО</span><h3 id="mission-detail-title">Първи живот</h3><p id="mission-detail-goal"></p><div class="start-actions">
+            <button id="start-button" class="button button-primary" type="button">▶ ЗАПОЧНИ МИСИЯ 1</button>
+            <button id="continue-button" class="button button-secondary" type="button" disabled title="Влез, за да продължиш записана игра">Продължи</button>
+          </div></div>
         </div>
       </section>
     </section>
 
     <!-- Екран 2: долината. Ходът се изчислява от simulation.js (стъпка 6). -->
     <section id="game-screen" aria-labelledby="game-title" hidden>
-      <div class="game-heading">
-        <button id="back-button" class="back-button" type="button">← Към мисиите</button>
-        <span id="turn-badge" class="turn-badge">Ход 0 / 10</span>
-      </div>
-      <h2 id="game-title">Мисия 1: Първи живот</h2>
-      <p id="game-goal" class="game-goal">Цел: и трите вида да оцелеят 10 хода.</p>
-      <p id="save-note" class="demo-note">Без вход — играта не се записва.</p>
-
-      <section class="metrics" aria-label="Показатели на долината">
+      <div class="game-hud">
+        <div class="game-heading">
+          <button id="back-button" class="back-button" type="button">← Мисии</button>
+          <div class="game-identity"><h2 id="game-title">Мисия 1: Първи живот</h2><p id="game-goal" class="game-goal">Цел: и трите вида да оцелеят 10 хода.</p></div>
+          <span id="turn-badge" class="turn-badge">Ход 0 / 10</span>
+        </div>
+        <section class="metrics" aria-label="Показатели на долината">
         <!-- main.js попълва числата от симулацията -->
-        <div class="metric" data-metric="water"><span>💧 Вода</span><strong>–</strong><span class="change same">0</span></div>
-        <div class="metric" data-metric="grass"><span>🌿 Трева</span><strong>–</strong><span class="change same">0</span></div>
-        <div class="metric" data-metric="rabbits"><span>🐇 Зайци</span><strong>–</strong><span class="change same">0</span></div>
-        <div class="metric" data-metric="foxes"><span>🦊 Лисици</span><strong>–</strong><span class="change same">0</span></div>
-      </section>
-
-      <section class="card scene-card" aria-labelledby="scene-title">
-        <div class="section-heading"><h3 id="scene-title">Долината</h3><span id="event-label" class="event-label">Без събитие</span></div>
-        <svg id="valley-scene" class="valley-scene" viewBox="0 0 720 260" role="img" aria-label="Илюстрация на долина с водоем, трева, зайци и лисица">
-          <rect width="720" height="260" fill="#d8ecf2"/>
-          <circle cx="620" cy="56" r="29" fill="#f6cf76"/>
-          <path d="M0 145 Q130 65 260 140 T520 126 T720 142 V260 H0Z" fill="#a8c6a0"/>
-          <path d="M0 185 Q160 125 340 185 T720 170 V260 H0Z" fill="#79a87d"/>
-          <path d="M32 220 Q190 171 345 215 Q420 244 324 260 H40Z" fill="#9c8661"/>
-          <path id="scene-river" d="M32 220 Q190 171 345 215 Q420 244 324 260 H40Z" fill="#6aafc4"/>
-          <path id="scene-shimmer" d="M50 225 Q185 190 312 221" fill="none" stroke="#b9e1e9" stroke-width="5"/>
-          <g id="scene-grass" fill="none" stroke="#315d3f" stroke-width="5" stroke-linecap="round">
-            <path d="M405 215 l-6 -19 m6 19 l9 -23 M455 228 l-7 -23 m7 23 l9 -16 M518 209 l-5 -18 m5 18 l8 -21"/>
-            <path d="M579 230 l-5 -20 m5 20 l11 -24 M663 213 l-4 -17 m4 17 l9 -19"/>
-          </g>
-          <g id="scene-rabbits" fill="#efe8da" stroke="#9b8673" stroke-width="3">
-            <ellipse cx="445" cy="195" rx="27" ry="16"/><circle cx="466" cy="181" r="13"/>
-            <ellipse cx="550" cy="208" rx="25" ry="15"/><circle cx="571" cy="194" r="12"/>
-            <ellipse cx="460" cy="157" rx="5" ry="18"/><ellipse cx="470" cy="158" rx="5" ry="18"/>
-            <ellipse cx="566" cy="171" rx="5" ry="17"/><ellipse cx="577" cy="172" rx="5" ry="17"/>
-          </g>
-          <use id="scene-more-rabbits" href="#scene-rabbits" transform="translate(-115 18) scale(.85)" style="display:none"/>
-          <g id="scene-foxes" fill="#bd714e" stroke="#714c3c" stroke-width="3">
-            <path d="M611 204 l24 -25 45 12 20 25 -39 12 -43 -5Z"/>
-            <path d="M622 199 l-14 -20 27 8 M672 192 l8 -21 11 25"/>
-          </g>
-          <use id="scene-more-foxes" href="#scene-foxes" transform="translate(-145 12) scale(.82)" style="display:none"/>
-          <circle cx="685" cy="200" r="3" fill="#26352e"/>
-          <g id="scene-rain" stroke="#d6f2f3" stroke-width="4" stroke-linecap="round" style="display:none">
-            <path d="m90 52-8 22m83-37-8 22m83 4-8 22m88-44-8 22m82-12-8 22m91-36-8 22m91 14-8 22m84-51-8 22"/>
-          </g>
-        </svg>
-        <p id="scene-caption" class="small-text">Състоянието на долината следва стойностите на показателите.</p>
-      </section>
-
-      <div class="phase-bar" aria-label="Последователност на хода">
-        <span>01 Действие</span><span>02 Прогноза</span><span>03 Ход</span><span>04 Последици</span>
+        <div class="metric" data-metric="water"><span><i class="resource-icon water-icon" aria-hidden="true"></i> Вода</span><strong>–</strong><span class="change same">0</span></div>
+        <div class="metric" data-metric="grass"><span><i class="resource-icon grass-icon" aria-hidden="true"></i> Трева</span><strong>–</strong><span class="change same">0</span></div>
+        <div class="metric" data-metric="rabbits"><span><i class="resource-icon rabbit-icon" aria-hidden="true"></i> Зайци</span><strong>–</strong><span class="change same">0</span></div>
+        <div class="metric" data-metric="foxes"><span><i class="resource-icon fox-icon" aria-hidden="true"></i> Лисици</span><strong>–</strong><span class="change same">0</span></div>
+        </section>
       </div>
+
+      <div class="game-stage">
+        <section class="scene-card" aria-labelledby="scene-title">
+          <div class="scene-topline"><h3 id="scene-title">Живата долина</h3><span id="event-label" class="event-label">Без събитие</span></div>
+          <svg id="valley-scene" class="valley-scene" viewBox="0 0 1000 590" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Илюстрация на долина с водоем, трева, зайци и лисица">
+            <defs>
+              <linearGradient id="sky-gradient" x2="0" y2="1"><stop stop-color="#568b9b"/><stop offset=".6" stop-color="#b9d9bd"/><stop offset="1" stop-color="#e9d39b"/></linearGradient>
+              <linearGradient id="river-gradient" x2="0" y2="1"><stop stop-color="#a4dee0"/><stop offset=".5" stop-color="#438ba1"/><stop offset="1" stop-color="#225d79"/></linearGradient>
+              <linearGradient id="meadow-gradient" x2="0" y2="1"><stop stop-color="#90ad61"/><stop offset="1" stop-color="#335e39"/></linearGradient>
+              <radialGradient id="sunlight"><stop stop-color="#fff1b7" stop-opacity=".55"/><stop offset="1" stop-color="#fff1b7" stop-opacity="0"/></radialGradient>
+              <clipPath id="river-clip"><rect id="scene-river-level" x="0" y="510" width="1000" height="100"/></clipPath>
+              <g id="pine-tree"><path d="M0 0v90" stroke="#443f2d" stroke-width="13"/><path d="M0-150-69 25 0 5 69 25Z" fill="#183f38"/><path d="M0-135-53-7 0-27 53-7Z" fill="#28614a"/><path d="M0-110-38-41 0-54" fill="#72a778" opacity=".45"/></g>
+              <g id="round-tree"><path d="M0 0v83" stroke="#514832" stroke-width="15"/><circle cy="-44" r="65" fill="#245c48"/><circle cx="-21" cy="-66" r="43" fill="#3e7a53"/><circle cx="31" cy="-63" r="43" fill="#336b4e"/><path d="M-35-96q25-18 54-12" fill="none" stroke="#81aa73" stroke-width="7" opacity=".55"/></g>
+              <g id="rabbit-shape"><ellipse cy="12" rx="24" ry="15" fill="#e9dcc0"/><circle cx="19" cy="-1" r="12" fill="#f5e9d0"/><ellipse cx="12" cy="-24" rx="5" ry="22" fill="#f3e5cb" transform="rotate(-13 12 -24)"/><ellipse cx="24" cy="-25" rx="5" ry="22" fill="#f3e5cb" transform="rotate(11 24 -25)"/><circle cx="23" cy="-4" r="2" fill="#2d3931"/><circle cx="-21" cy="7" r="7" fill="#fff0d7"/></g>
+              <g id="fox-shape"><path d="M-33 17q-38-25-49-43 7 48 45 58" fill="#9d4f34"/><path d="M-39 12q21-27 66-19l22 27q-31 23-75 11Z" fill="#be7445"/><path d="M15-4 30-31 35 0 53-28 57 13 46 28 18 21Z" fill="#d48850"/><path d="m42 25 16-4-9 10Z" fill="#f7e6c3"/><circle cx="45" cy="9" r="2.5" fill="#27372b"/><path d="m-16 29-3 21m29-19 2 20" stroke="#643f2b" stroke-width="6"/></g>
+            </defs>
+            <rect width="1000" height="590" fill="url(#sky-gradient)"/>
+            <circle cx="763" cy="103" r="175" fill="url(#sunlight)"/><circle cx="763" cy="103" r="47" fill="#f9d78f"/>
+            <g class="scene-clouds" fill="#e9f0df" opacity=".62"><ellipse cx="217" cy="102" rx="85" ry="21"/><ellipse cx="168" cy="91" rx="43" ry="25"/><ellipse cx="550" cy="71" rx="70" ry="17"/></g>
+            <path d="M0 333 127 179 245 282 388 133 550 290 718 172 879 286 1000 184V590H0Z" fill="#668e8a"/><path d="M0 356 127 203 245 303 388 156 550 311 718 195 879 310 1000 204" fill="none" stroke="#d7e1c2" stroke-width="13" opacity=".55"/>
+            <path d="M0 347q163-100 319-33t360-7q170-74 321 43V590H0Z" fill="#55876c"/><path d="M0 400q191-101 392-12t608-24V590H0Z" fill="#316b50"/>
+            <g opacity=".8"><use href="#pine-tree" transform="translate(85 365) scale(.88)"/><use href="#round-tree" transform="translate(177 381) scale(.7)"/><use href="#pine-tree" transform="translate(278 390) scale(.64)"/><use href="#round-tree" transform="translate(617 366) scale(.72)"/><use href="#pine-tree" transform="translate(901 385) scale(.85)"/><use href="#round-tree" transform="translate(986 407) scale(.65)"/></g>
+            <path d="M0 472q220-90 425-38t575-37V590H0Z" fill="url(#meadow-gradient)"/><path d="M0 522q165-76 350-29 163 44 260-11 150-87 390-24V590H0Z" fill="#a39364"/>
+            <path d="M0 525q165-67 350-24 163 48 260-5 150-85 390-19v113H0Z" fill="#8b7955"/>
+            <g clip-path="url(#river-clip)"><path id="scene-river" d="M0 536q165-67 350-24 163 48 260-5 150-85 390-19v102H0Z" fill="url(#river-gradient)"/>
+            <path id="scene-shimmer" class="river-motion" d="M0 548q167-63 350-24 163 48 260-5 150-85 390-18M0 578q180-50 346-17 181 41 292-11 153-72 362-20" fill="none" stroke="#d9f2d8" stroke-width="6" opacity=".62"/></g>
+            <g id="scene-grass" fill="none" stroke="#a6c974" stroke-width="6" stroke-linecap="round"><path d="m79 479-12-31m12 31 15-36m116 20-11-31m11 31 14-30m121 20-8-38m8 38 17-28m104 16-11-34m11 34 14-37m112 27-12-28m12 28 18-31m121 17-9-38m9 38 15-31m109 28-14-30m14 30 18-35m96 27-13-31m13 31 17-31"/></g>
+            <g id="scene-rabbits" class="animal-motion"><use href="#rabbit-shape" transform="translate(420 446) scale(1.2)"/><use href="#rabbit-shape" transform="translate(533 429) scale(.84)"/></g>
+            <g id="scene-more-rabbits" class="animal-motion" style="display:none"><use href="#rabbit-shape" transform="translate(331 445) scale(.75)"/><use href="#rabbit-shape" transform="translate(604 456) scale(.68)"/></g>
+            <g id="scene-foxes" class="animal-motion"><use href="#fox-shape" transform="translate(756 442) scale(1.18)"/></g>
+            <g id="scene-more-foxes" class="animal-motion" style="display:none"><use href="#fox-shape" transform="translate(852 455) scale(.75)"/></g>
+            <g id="scene-rain" stroke="#d7f1ef" stroke-width="5" stroke-linecap="round" style="display:none"><path d="m117 38-14 37m102-43-14 37m104 2-14 37m99-63-14 37m101-7-14 37m98-53-14 37m106 5-14 37m103-51-14 37m105-19-14 37"/></g>
+            <path d="M0 590v-65q139-35 269 3l-61 62Z" fill="#1b453a" opacity=".72"/><use href="#round-tree" transform="translate(45 580) scale(1.33)"/><use href="#pine-tree" transform="translate(944 560) scale(1.18)"/>
+          </svg>
+          <div class="scene-bottomline"><span id="scene-caption">Вода 60 · Трева 200 · Зайци 20 · Лисици 4</span><span class="scene-scale">ДОЛИНА 01 / НАБЛЮДЕНИЕ</span></div>
+          <div id="turn-feedback" class="turn-feedback" hidden><span class="eyebrow">ПОСЛЕДИЦИ ОТ ХОДА</span><h3 id="feedback-title">Долината се промени</h3><p id="feedback-changes"></p><p id="feedback-cause"></p><button id="feedback-continue" class="button button-primary" type="button">▶ ПРОДЪЛЖИ</button></div>
+        </section>
+
+        <aside class="game-console" aria-label="Управление на хода">
+
+      <div class="phase-bar" aria-label="Последователност на хода"><span>01 ДЕЙСТВИЕ</span><span>02 ПРОГНОЗА</span><span>03 ХОД</span></div>
 
       <div class="controls-grid">
-        <section class="card" aria-labelledby="prediction-title">
-          <h3 id="prediction-title">2. Твоята прогноза</h3>
-          <p class="small-text">Избери ↑, = или ↓ за всеки показател.</p>
+        <section id="prediction-panel" class="card" aria-labelledby="prediction-title">
+          <span class="console-kicker">СТЪПКА 02 / ПРОГНОЗА</span><h3 id="prediction-title">Какво ще се промени?</h3>
+          <p id="prediction-progress" class="small-text">Прогноза: 0 от 4</p>
           <div class="prediction-list">
-            <div class="prediction-row"><span>💧 Вода</span><div class="choice-group" role="group" aria-label="Прогноза за водата" data-key="water"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
-            <div class="prediction-row"><span>🌿 Трева</span><div class="choice-group" role="group" aria-label="Прогноза за тревата" data-key="grass"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
-            <div class="prediction-row"><span>🐇 Зайци</span><div class="choice-group" role="group" aria-label="Прогноза за зайците" data-key="rabbits"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
-            <div class="prediction-row"><span>🦊 Лисици</span><div class="choice-group" role="group" aria-label="Прогноза за лисиците" data-key="foxes"><button type="button" aria-pressed="false" data-value="up">↑</button><button type="button" aria-pressed="false" data-value="same">=</button><button type="button" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>Вода</span><div class="choice-group" role="group" aria-label="Прогноза за водата" data-key="water"><button type="button" aria-label="Водата се увеличава" aria-pressed="false" data-value="up">↑</button><button type="button" aria-label="Водата не се променя" aria-pressed="false" data-value="same">=</button><button type="button" aria-label="Водата намалява" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>Трева</span><div class="choice-group" role="group" aria-label="Прогноза за тревата" data-key="grass"><button type="button" aria-label="Тревата се увеличава" aria-pressed="false" data-value="up">↑</button><button type="button" aria-label="Тревата не се променя" aria-pressed="false" data-value="same">=</button><button type="button" aria-label="Тревата намалява" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>Зайци</span><div class="choice-group" role="group" aria-label="Прогноза за зайците" data-key="rabbits"><button type="button" aria-label="Зайците се увеличават" aria-pressed="false" data-value="up">↑</button><button type="button" aria-label="Зайците не се променят" aria-pressed="false" data-value="same">=</button><button type="button" aria-label="Зайците намаляват" aria-pressed="false" data-value="down">↓</button></div></div>
+            <div class="prediction-row"><span>Лисици</span><div class="choice-group" role="group" aria-label="Прогноза за лисиците" data-key="foxes"><button type="button" aria-label="Лисиците се увеличават" aria-pressed="false" data-value="up">↑</button><button type="button" aria-label="Лисиците не се променят" aria-pressed="false" data-value="same">=</button><button type="button" aria-label="Лисиците намаляват" aria-pressed="false" data-value="down">↓</button></div></div>
           </div>
-          <label class="reason-label" for="reason">Защо мислиш така? <span class="small-text">(по желание)</span></label>
-          <textarea id="reason" rows="3" placeholder="Например: Засаждам трева и зайците ще имат повече храна."></textarea>
+          <details class="reason-details"><summary>Защо мислиш така? (по желание)</summary><label class="visually-hidden" for="reason">Причина за прогнозата</label><textarea id="reason" rows="2" placeholder="Например: зайците ще имат повече храна."></textarea></details>
         </section>
-        <section class="card" aria-labelledby="actions-title">
-          <h3 id="actions-title">1. Избери действие</h3>
-          <p class="small-text">Едно действие за всеки ход. Недостъпните действия показват причината.</p>
+        <section id="action-panel" class="card" aria-labelledby="actions-title">
+          <span class="console-kicker">СТЪПКА 01 / НАМЕСА</span><h3 id="actions-title">Твоят следващ ход</h3>
+          <p class="small-text">Избери как ще повлияеш на долината.</p>
+          <div class="selected-action"><span id="selected-action-label">Избрано действие</span><button id="change-action" type="button">Промени ↺</button></div>
           <div id="action-list" class="action-list" role="group" aria-label="Действия">
-            <button type="button" data-action="plant-grass" aria-pressed="false"><span>🌿 Засади трева</span><small>+50 трева · −10 вода</small></button>
-            <button type="button" data-action="restore-water" aria-pressed="false"><span>💧 Възстанови водоем</span><small>+25 вода · остават 2 / 2</small></button>
-            <button type="button" data-action="add-rabbits" aria-pressed="false"><span>🐇 Добави зайци</span><small>+6 зайци · остават 3 / 3</small></button>
-            <button type="button" data-action="add-foxes" aria-pressed="false"><span>🦊 Добави лисици</span><small>+2 лисици · остават 0 / 2</small></button>
-            <button type="button" data-action="none" aria-pressed="false"><span>✋ Без намеса</span><small>безплатно</small></button>
+            <button type="button" data-action="plant-grass" aria-pressed="false"><i class="resource-icon grass-icon" aria-hidden="true"></i><span>Засади трева</span><small>+50 трева · −10 вода</small></button>
+            <button type="button" data-action="restore-water" aria-pressed="false"><i class="resource-icon water-icon" aria-hidden="true"></i><span>Възстанови водоем</span><small>+25 вода · остават 2 / 2</small></button>
+            <button type="button" data-action="add-rabbits" aria-pressed="false"><i class="resource-icon rabbit-icon" aria-hidden="true"></i><span>Добави зайци</span><small>+6 зайци · остават 3 / 3</small></button>
+            <button type="button" data-action="add-foxes" aria-pressed="false"><i class="resource-icon fox-icon" aria-hidden="true"></i><span>Добави лисици</span><small>+2 лисици · остават 0 / 2</small></button>
+            <button type="button" data-action="none" aria-pressed="false"><i class="resource-icon none-icon" aria-hidden="true"></i><span>Без намеса</span><small>безплатно</small></button>
           </div>
           <p id="action-reasons" class="action-reason">Добави лисици: действието вече е използвано 2 от 2 пъти в тази мисия.</p>
           <p id="action-message" class="small-text" role="status">Още няма избрано действие.</p>
@@ -192,26 +188,31 @@
       </div>
 
       <div class="next-area">
-        <button id="next-button" class="button button-primary" type="button" disabled>Следващ ход →</button>
+        <button id="next-button" class="button button-primary" type="button" disabled>▶ ИЗПЪЛНИ ХОДА</button>
         <p id="turn-message" class="small-text" role="status">Избери действие и направи четири прогнози.</p>
       </div>
-      <section class="card" aria-labelledby="state-title">
-        <h3 id="state-title">Състояние на екрана</h3>
+      <section class="console-status" aria-labelledby="state-title">
+        <h3 id="state-title" class="visually-hidden">Състояние на играта</h3>
         <p id="game-state" class="state-banner" data-state="ready" role="status" aria-live="polite">Готово за избор на действие и прогноза.</p>
       </section>
+        </aside>
+      </div>
 
-      <div class="history-grid">
-        <section class="card" aria-labelledby="chart-title">
-          <h3 id="chart-title">Графика по ходове</h3>
+      <div class="game-dock"><div class="dock-tools"><button id="journal-button" type="button">▤ Дневник</button><button id="history-button" type="button">⌁ История</button></div><p id="save-note" class="demo-note">Без вход — играта не се записва.</p></div>
+
+      <div id="game-overlay" class="game-overlay" hidden>
+        <div class="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><div class="overlay-heading"><h3 id="overlay-title">История на долината</h3><button id="overlay-close" type="button" aria-label="Затвори панела">✕</button></div>
+        <div class="history-grid"><section id="history-panel" class="card" aria-labelledby="chart-title" hidden>
+          <h3 id="chart-title">История на показателите</h3>
           <div class="chart-box"><canvas id="history-chart" role="img" aria-label="Графика на вода, трева, зайци и лисици по ходове"></canvas></div>
           <p class="small-text">Линиите показват процент от максимума за всеки показател. Задръж върху точка за точния брой.</p>
           <p id="chart-message" class="small-text" role="status"></p>
         </section>
-        <section class="card" aria-labelledby="diary-title">
-          <h3 id="diary-title">📓 Дневник на причините</h3>
+        <section id="journal-panel" class="card" aria-labelledby="diary-title" hidden>
+          <h3 id="diary-title">Дневник на причините</h3>
           <!-- main.js показва тук прогнозата, резултата и причините за последния ход -->
           <div id="diary"><p class="small-text">След първия ход тук ще видиш прогнозата си, резултата и защо долината се е променила.</p></div>
-        </section>
+        </section></div></div>
       </div>
     </section>
 
@@ -233,6 +234,7 @@
         <p id="result-chart-message" class="small-text" role="status"></p>
         <div class="start-actions">
           <button id="restart-button" class="button button-primary" type="button">Опитай пак</button>
+          <button id="next-mission-button" class="button button-secondary" type="button" hidden>Следваща мисия →</button>
           <button id="result-back-button" class="button button-secondary" type="button">Към мисиите</button>
         </div>
       </div>

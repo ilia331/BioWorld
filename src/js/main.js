@@ -28,6 +28,9 @@ let user = null;
 const LABELS = { water: "💧 Вода", grass: "🌿 Трева", rabbits: "🐇 Зайци", foxes: "🦊 Лисици" };
 const ARROWS = { up: "↑", same: "=", down: "↓" };
 const EVENT_NAMES = { none: "Без събитие", rain: "🌧 Дъжд", drought: "☀ Суша", disease: "🦠 Болест" };
+const gameOverlay = document.getElementById("game-overlay");
+const turnFeedback = document.getElementById("turn-feedback");
+let overlayReturnButton = null;
 
 // Подреждаме действията преди прогнозите и за клавиатурата.
 document.querySelector(".controls-grid").prepend(document.querySelector('[aria-labelledby="actions-title"]'));
@@ -69,19 +72,32 @@ function selectMission(mission, card) {
   for (const otherCard of missionList.children) {
     otherCard.setAttribute("aria-pressed", otherCard === card ? "true" : "false");
   }
-  startButton.textContent = `Започни мисия ${mission.number} →`;
+  startButton.textContent = `▶ ЗАПОЧНИ МИСИЯ ${mission.number}`;
+  const detail = document.getElementById("mission-detail");
+  detail.dataset.mission = String(mission.number);
+  document.getElementById("mission-detail-number").textContent = `${String(mission.number).padStart(2, "0")} / 05`;
+  document.getElementById("mission-detail-level").textContent = `Трудност: ${mission.level.length / 2} / 3`;
+  document.getElementById("mission-detail-title").textContent = mission.title;
+  document.getElementById("mission-detail-goal").textContent = `Цел: ${mission.goalText}`;
 }
 
 function showScreen(screen) {
+  closeOverlay();
   homeScreen.hidden = screen !== "home";
   missionsScreen.hidden = screen !== "missions";
   gameScreen.hidden = screen !== "game";
   resultScreen.hidden = screen !== "result";
+  document.body.dataset.screen = screen;
   window.scrollTo(0, 0);
 }
 
 document.getElementById("home-start").addEventListener("click", () => showScreen("missions"));
 document.getElementById("home-missions").addEventListener("click", () => showScreen("missions"));
+document.getElementById("home-rules").addEventListener("click", () => {
+  const help = document.getElementById("home-help");
+  help.open = true;
+  help.querySelector("summary").focus();
+});
 document.getElementById("missions-home").addEventListener("click", () => showScreen("home"));
 
 // ---------- Започване и продължаване на игра ----------
@@ -94,6 +110,7 @@ function openGame(mission, state, history, simulationId, entries = []) {
   showScreen("game");
   renderGame(null);
   renderDiary();
+  turnFeedback.hidden = true;
   resetChoices();
   backButton.focus();
 }
@@ -142,6 +159,10 @@ startButton.addEventListener("click", () => startMission(selectedMission));
 continueButton.addEventListener("click", continueGame);
 homeContinueButton.addEventListener("click", continueGame);
 document.getElementById("restart-button").addEventListener("click", () => startMission(game.mission));
+document.getElementById("next-mission-button").addEventListener("click", () => {
+  const nextMission = MISSIONS.find((mission) => mission.number === game.mission.number + 1 && !mission.locked);
+  if (nextMission) startMission(nextMission);
+});
 document.getElementById("result-back-button").addEventListener("click", () => {
   showScreen("missions");
   refreshContinueButton();
@@ -166,6 +187,8 @@ function renderGame(previous) {
     const diff = previous ? s[key] - previous[key] : 0;
     change.textContent = diff > 0 ? `+${diff}` : diff < 0 ? `−${-diff}` : "0";
     change.className = "change " + (diff > 0 ? "up" : diff < 0 ? "down" : "same");
+    box.dataset.trend = diff > 0 ? "up" : diff < 0 ? "down" : "same";
+    box.dataset.critical = s[key] === 0 || (key === "water" && s.water < 20) ? "true" : "false";
   }
   document.getElementById("turn-badge").textContent = `Ход ${s.turn} / 10`;
 
@@ -185,6 +208,10 @@ function renderGame(previous) {
   }
   renderActions();
   renderScene(s);
+  if (!gameOverlay.hidden && !document.getElementById("history-panel").hidden) drawGameChart();
+}
+
+function drawGameChart() {
   const drawn = drawHistoryChart(document.getElementById("history-chart"), game.history);
   document.getElementById("chart-message").textContent = drawn ? "" : "Графиката изисква интернет връзка.";
 }
@@ -192,8 +219,10 @@ function renderGame(previous) {
 // Сцената показва същите числа като показателите, без отделна симулация.
 function renderScene(state) {
   const scene = document.getElementById("valley-scene");
-  document.getElementById("scene-river").style.opacity = String(state.water / 100);
-  document.getElementById("scene-shimmer").style.opacity = String(state.water / 100);
+  // Изрязваме реката според истинската вода; при нула се вижда сухото корито.
+  document.getElementById("scene-river-level").setAttribute("y", String(590 - state.water * 1.1));
+  document.getElementById("scene-river").style.opacity = state.water ? "1" : "0";
+  document.getElementById("scene-shimmer").style.opacity = state.water ? ".62" : "0";
   document.getElementById("scene-grass").style.opacity = String(.2 + state.grass / 500 * .8);
   document.getElementById("scene-rabbits").style.display = state.rabbits === 0 ? "none" : "";
   document.getElementById("scene-more-rabbits").style.display = state.rabbits < 35 ? "none" : "";
@@ -285,6 +314,8 @@ function showResult() {
   }
   document.getElementById("reflection-question").textContent =
     "Помисли: кое твое действие промени долината най-силно? Какво би избрал различно при следващ опит?";
+  const nextMission = MISSIONS.find((mission) => mission.number === game.mission.number + 1 && !mission.locked);
+  document.getElementById("next-mission-button").hidden = !nextMission;
   showScreen("result");
   const drawn = drawHistoryChart(document.getElementById("result-chart"), game.history);
   document.getElementById("result-chart-message").textContent = drawn ? "" : "Графиката изисква интернет връзка.";
@@ -302,6 +333,7 @@ function chooseOne(button, group) {
   }
   if (group === actionList) {
     actionMessage.textContent = `Избрано действие: ${button.querySelector("span").textContent}.`;
+    document.getElementById("selected-action-label").textContent = button.querySelector("span").textContent;
   }
   updateNextButton();
 }
@@ -312,6 +344,8 @@ function updateNextButton() {
   const finished = game && game.state.turn >= 10;
   nextButton.disabled = finished || !canContinue(actionChosen, predictionCount, gameState.dataset.state);
   document.querySelector(".phase-bar").dataset.phase = !actionChosen ? "action" : predictionCount < 4 ? "prediction" : "execute";
+  gameScreen.dataset.phase = !turnFeedback.hidden ? "feedback" : !actionChosen ? "action" : "prediction";
+  document.getElementById("prediction-progress").textContent = `Прогноза: ${predictionCount} от 4`;
 
   if (gameState.dataset.state === "error" || finished) return;
   if (!actionChosen) {
@@ -319,7 +353,7 @@ function updateNextButton() {
   } else if (predictionCount < 4) {
     turnMessage.textContent = `Остават ${4 - predictionCount} прогнози преди следващия ход.`;
   } else {
-    turnMessage.textContent = "Изборът е готов. Натисни „Следващ ход“.";
+    turnMessage.textContent = "Готово. Изпълни хода, за да видиш последиците.";
   }
 }
 
@@ -355,9 +389,56 @@ function resetChoices() {
   }
   document.getElementById("reason").value = "";
   actionMessage.textContent = "Още няма избрано действие.";
+  document.getElementById("selected-action-label").textContent = "Избрано действие";
   renderActions();
   setGameState("ready", "Готово за избор на действие и прогноза.");
 }
+
+document.getElementById("change-action").addEventListener("click", () => {
+  for (const button of gameScreen.querySelectorAll("button[aria-pressed]")) button.setAttribute("aria-pressed", "false");
+  actionMessage.textContent = "Избери друго действие.";
+  updateNextButton();
+  actionList.querySelector("button:not(:disabled)").focus();
+});
+
+document.getElementById("feedback-continue").addEventListener("click", () => {
+  turnFeedback.hidden = true;
+  updateNextButton();
+  actionList.querySelector("button:not(:disabled)").focus();
+});
+
+function openOverlay(type, button) {
+  overlayReturnButton = button;
+  document.getElementById("history-panel").hidden = type !== "history";
+  document.getElementById("journal-panel").hidden = type !== "journal";
+  document.getElementById("overlay-title").textContent = type === "history" ? "История на долината" : "Дневник на причините";
+  gameOverlay.hidden = false;
+  if (type === "history") drawGameChart();
+  document.getElementById("overlay-close").focus();
+}
+
+function closeOverlay() {
+  if (gameOverlay.hidden) return;
+  gameOverlay.hidden = true;
+  if (overlayReturnButton && !gameScreen.hidden) overlayReturnButton.focus();
+}
+
+document.getElementById("history-button").addEventListener("click", (event) => openOverlay("history", event.currentTarget));
+document.getElementById("journal-button").addEventListener("click", (event) => openOverlay("journal", event.currentTarget));
+document.getElementById("overlay-close").addEventListener("click", closeOverlay);
+gameOverlay.addEventListener("click", (event) => { if (event.target === gameOverlay) closeOverlay(); });
+document.addEventListener("keydown", (event) => {
+  if (gameOverlay.hidden) return;
+  if (event.key === "Escape") closeOverlay();
+  // Фокусът остава в отворения панел при клавиатурна навигация.
+  if (event.key === "Tab") {
+    const focusable = [...gameOverlay.querySelectorAll("button, summary")].filter((element) => element.offsetParent !== null);
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+});
 
 for (const group of document.querySelectorAll(".choice-group")) {
   group.addEventListener("click", (event) => {
@@ -396,10 +477,21 @@ nextButton.addEventListener("click", async () => {
   renderGame(previous);
   renderDiary();
   resetChoices();
-  turnMessage.textContent = `Ход ${result.state.turn} е изигран. Виж „Дневника на причините“ по-долу.`;
+  turnMessage.textContent = `Ход ${result.state.turn} е изигран.`;
 
   let status = "active";
   if (result.state.turn >= 10) status = showResult().success ? "won" : "lost";
+  else {
+    const changed = ["water", "grass", "rabbits", "foxes"].map((key) => {
+      const difference = result.state[key] - previous[key];
+      return `${LABELS[key]} ${difference > 0 ? "+" + difference : difference < 0 ? "−" + -difference : "="}`;
+    });
+    document.getElementById("feedback-title").textContent = `Ход ${result.state.turn}: долината се промени`;
+    document.getElementById("feedback-changes").textContent = changed.join(" · ") + ` · ${comparison.points} / 4 верни прогнози`;
+    document.getElementById("feedback-cause").textContent = result.reasons[0] || "Няма допълнително събитие.";
+    turnFeedback.hidden = false;
+    updateNextButton();
+  }
 
   if (game.simulationId) {
     setGameState("loading", "Записване на хода…");
@@ -492,6 +584,7 @@ signOutButton.addEventListener("click", async () => {
 // ---------- Начало ----------
 
 showMissions();
+selectMission(MISSIONS[0], missionList.firstElementChild);
 renderActions();
 showScreen("home");
 document.getElementById("status").textContent = "стъпка 7 · пет мисии и графика";

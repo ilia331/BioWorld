@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title">
+  <title id="title">Живата речна долина</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#487b8e"/><stop offset=".55" stop-color="#b0d1bd"/><stop offset="1" stop-color="#f1d29d"/></linearGradient>
+    <linearGradient id="far" x2="0" y2="1"><stop stop-color="#7a9f9c"/><stop offset="1" stop-color="#426e68"/></linearGradient>
+    <linearGradient id="hill" x2="0" y2="1"><stop stop-color="#86a66c"/><stop offset="1" stop-color="#315e43"/></linearGradient>
+    <linearGradient id="river" x2="0" y2="1"><stop stop-color="#bce7df"/><stop offset=".45" stop-color="#579db3"/><stop offset="1" stop-color="#265b79"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#ffe8a5" stop-opacity=".75"/><stop offset="1" stop-color="#ffe8a5" stop-opacity="0"/></radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
+    <g id="pine"><path d="M0 12V110" stroke="#493f30" stroke-width="14"/><path d="M0-182-87 37-30 18-70 75 0 53 70 75 30 18 87 37Z" fill="#173e38"/><path d="M0-176-61-6-17-18-48 38 0 18" fill="#44795b" opacity=".8"/><path d="M-29 27-40 45m29-49-14 16" stroke="#a4c184" stroke-width="6" opacity=".5"/></g>
+    <g id="oak"><path d="M0 14V128" stroke="#554934" stroke-width="21"/><path d="M0-136c-104 0-139 124-57 148 39 31 100 31 142-8 55-74-8-142-85-140Z" fill="#265c43"/><circle cx="-45" cy="-59" r="61" fill="#417b53"/><circle cx="45" cy="-74" r="62" fill="#32704e"/><path d="M-84-58q11-39 49-55m68 4q31 7 52 39" fill="none" stroke="#94b476" stroke-width="11" opacity=".48"/></g>
+    <g id="rabbit"><ellipse cy="13" rx="33" ry="21" fill="#e9ddc6"/><circle cx="29" cy="-2" r="18" fill="#f8e9d2"/><ellipse cx="23" cy="-36" rx="7" ry="33" fill="#f8e9d2" transform="rotate(-12 23 -36)"/><ellipse cx="40" cy="-37" rx="7" ry="30" fill="#f8e9d2" transform="rotate(12 40 -37)"/><ellipse cx="-29" cy="5" rx="12" ry="11" fill="#fff1d8"/><circle cx="36" cy="-6" r="3" fill="#263c32"/><path d="M34 12q11 4 17-1" fill="none" stroke="#aa8b7d" stroke-width="2"/></g>
+    <g id="fox"><path d="M-38 27q-59-6-90-55 9 69 79 75Z" fill="#b35e3e"/><path d="M-60 22Q-38-24 36-14L79 25Q43 61-38 50Z" fill="#c6794a"/><path d="M35-11 53-59 67-4 88-57 96 20 78 42 32 27Z" fill="#d9874d"/><path d="m65 41 34-24-9 32Z" fill="#f4e2c3"/><circle cx="77" cy="13" r="3.5" fill="#26332e"/><path d="m-26 49-4 37m43-31 5 33m44-44 6 32" stroke="#654632" stroke-width="10"/></g>
+    <g id="flower"><path d="M0 0v-25" stroke="#3d733d" stroke-width="3"/><circle cy="-30" r="5" fill="#f9dd87"/><circle cx="-8" cy="-30" r="6" fill="#f8f0d4"/><circle cx="8" cy="-30" r="6" fill="#f8f0d4"/><circle cy="-38" r="6" fill="#f8f0d4"/><circle cy="-22" r="6" fill="#f8f0d4"/></g>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <circle cx="1180" cy="170" r="235" fill="url(#glow)"/><circle cx="1180" cy="170" r="72" fill="#ffe0a0"/>
+  <g fill="#ecf2e2" opacity=".65"><ellipse cx="360" cy="140" rx="160" ry="31"/><ellipse cx="280" cy="121" rx="71" ry="50"/><ellipse cx="950" cy="105" rx="119" ry="26"/><ellipse cx="892" cy="91" rx="50" ry="33"/></g>
+  <path d="M0 568 188 289 319 411 534 211 753 444 921 289 1076 427 1321 235 1600 444v456H0Z" fill="url(#far)"/>
+  <path d="m188 289 75 72 56 50-68-11Zm346-78 91 109 59 63-101-50Zm787 24 103 98 81 63-105-51Z" fill="#dae2ca" opacity=".75"/>
+  <path d="M0 610Q320 394 595 532q223-122 470-36t535-20v424H0Z" fill="#54866a"/><path d="M0 661q307-154 602-69t509-4q244-86 489 40v272H0Z" fill="#316d50"/>
+  <g opacity=".72"><use href="#pine" transform="translate(135 613) scale(1.05)"/><use href="#pine" transform="translate(291 593) scale(.75)"/><use href="#oak" transform="translate(454 622) scale(.6)"/><use href="#pine" transform="translate(684 576) scale(.72)"/><use href="#oak" transform="translate(1001 611) scale(.73)"/><use href="#pine" transform="translate(1456 626) scale(.96)"/><use href="#oak" transform="translate(1570 649) scale(.72)"/></g>
+  <path d="M0 737q300-134 567-75 291 64 504-51 279-137 529-10v299H0Z" fill="url(#hill)"/>
+  <path d="M0 808q280-116 512-54 252 63 475-26 281-110 613-31v203H0Z" fill="#a18d62"/>
+  <path d="M0 834q290-113 526-57 232 59 465-27 299-108 609-31v181H0Z" fill="url(#river)"/>
+  <path d="M0 835q290-113 526-57 232 59 465-27 299-108 609-31" fill="none" stroke="#daefe2" stroke-width="17" opacity=".8"/>
+  <path d="M0 867q254-72 481-30 226 43 480-24 346-99 639-40" fill="none" stroke="#9dd2d7" stroke-width="12" opacity=".45"/>
+  <path d="M655 686q-10-31 0-49m19 57 7-57m32 47 15-48m176 46-4-31m32 35 13-46m319 20-8-38m32 38 12-47" stroke="#d4dd8c" stroke-width="8" stroke-linecap="round"/>
+  <g opacity=".8"><use href="#flower" transform="translate(734 676) scale(.8)"/><use href="#flower" transform="translate(826 691) scale(1.1)"/><use href="#flower" transform="translate(1335 661) scale(.8)"/><use href="#flower" transform="translate(1405 693) scale(.7)"/></g>
+  <use href="#rabbit" transform="translate(815 684) scale(1.3)"/><use href="#rabbit" transform="translate(925 653) scale(.89)"/><use href="#rabbit" transform="translate(720 692) scale(.7)"/>
+  <use href="#fox" transform="translate(1300 680) scale(1.37)"/>
+  <path d="M0 900v-80q156-50 319 19l-79 61Zm1600 0v-110q-148-57-299 2l57 108Z" fill="#153d37" opacity=".75"/>
+  <use href="#oak" transform="translate(90 863) scale(1.56)"/><use href="#pine" transform="translate(1532 848) scale(1.32)"/>
+  <path d="M0 0h1600v900H0z" fill="none" stroke="#f6eac5" stroke-width="9" opacity=".18"/>
+</svg>
