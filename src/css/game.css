@@ -209,6 +209,21 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
   .metric { min-height:48px; }
   .game-stage { grid-template-columns:minmax(0,1fr) 315px; }
 }
+@media (min-width:701px) and (max-width:1050px) and (orientation:portrait) {
+  .game-stage { display:flex; flex-direction:column; }
+  .scene-card { flex:1 1 auto; min-height:0; }
+  .game-console { flex:0 0 375px; min-height:0; overflow:auto; border-left:0; border-top:2px solid #bda066; }
+  .action-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .action-list button:last-child { grid-column:1/3; }
+  .controls-grid h3 { font-size:1.05rem; }
+  #game-screen[data-phase="prediction"] .game-console { flex-basis:440px; }
+  #game-screen[data-phase="prediction"] #action-panel { margin-bottom:4px; padding-bottom:4px; }
+  #game-screen[data-phase="prediction"] .prediction-list { margin:5px 0; }
+  #game-screen[data-phase="prediction"] .prediction-row { padding:2px 0; }
+  #game-screen[data-phase="prediction"] .choice-group button { min-height:33px; }
+  #game-screen[data-phase="prediction"] .reason-details { margin:4px 0; }
+  #game-screen[data-phase="prediction"] .next-area .small-text { display:none; }
+}
 @media (max-width:700px) {
   .top-bar { height:56px; padding:0 12px; }.top-bar-inner { flex-direction:row; align-items:center; justify-content:space-between; }.brand-symbol { width:29px; height:29px; font-size:20px; }.top-bar h1 { font-size:1.04rem; }.top-bar .subtitle { font-size:.57rem; }.account-buttons { margin:0; }.account-buttons button { min-height:32px; font-size:.68rem; padding:4px 7px; }.account-name { display:none; }
   #home-screen,.home-hero { min-height:calc(100dvh - 56px); }.home-art { object-position:60% center; }.home-vignette { background:linear-gradient(0deg,#071d1bf7 0%,#0b2d29d8 48%,#1b453422 100%); }.home-copy { position:absolute; bottom:45px; left:0; width:100%; box-sizing:border-box; padding:18px 23px; }.home-copy h2 { font-size:clamp(2.1rem,9vw,3.5rem); }.home-copy > p { font-size:.88rem !important; margin-bottom:17px; }.home-actions { width:100%; gap:5px; }.menu-play { min-height:52px; }.menu-option { min-height:36px; }.home-corner { display:none; }.home-help { bottom:4px; right:8px; }
