@@ -210,7 +210,7 @@ function renderGame(previous) {
   renderActions();
   renderScene(s);
   // 3D долината (scene3d.js) показва същото състояние. Ако я няма, остава SVG картинката.
-  if (window.Scene3D) window.Scene3D.update(s, previous ? game.entries.at(-1).event : null, { instant: !previous });
+  if (window.Scene3D) window.Scene3D.update(s, previous ? game.entries.at(-1).event : null, { instant: !previous, history: game.history, entries: game.entries });
   if (!gameOverlay.hidden && !document.getElementById("history-panel").hidden) drawGameChart();
 }
 
@@ -349,6 +349,8 @@ function updateNextButton() {
   nextButton.disabled = finished || !canContinue(actionChosen, predictionCount, gameState.dataset.state);
   document.querySelector(".phase-bar").dataset.phase = !actionChosen ? "action" : predictionCount < 4 ? "prediction" : "execute";
   gameScreen.dataset.phase = !turnFeedback.hidden ? "feedback" : !actionChosen ? "action" : "prediction";
+  // 3D долината показва прекия ефект на избраното действие (или го маха при отказ/смяна).
+  if (window.Scene3D && game) window.Scene3D.preview(actionChosen && !finished ? actionChosen.dataset.action : null, game.state, game.mission);
   document.getElementById("prediction-progress").textContent = `Прогноза: ${predictionCount} от 4`;
 
   if (gameState.dataset.state === "error" || finished) return;
