@@ -113,7 +113,7 @@ function openGame(mission, state, history, simulationId, entries = []) {
   renderDiary();
   turnFeedback.hidden = true;
   resetChoices();
-  backButton.focus();
+  actionList.querySelector("button:not(:disabled)").focus();
 }
 
 async function startMission(mission) {
@@ -318,6 +318,7 @@ function showResult() {
   const nextMission = MISSIONS.find((mission) => mission.number === game.mission.number + 1 && !mission.locked);
   document.getElementById("next-mission-button").hidden = !nextMission;
   showScreen("result");
+  document.getElementById("result-title").focus();
   const drawn = drawHistoryChart(document.getElementById("result-chart"), game.history);
   document.getElementById("result-chart-message").textContent = drawn ? "" : "Графиката изисква интернет връзка.";
   setGameState("ready", "Мисията приключи след 10 хода.");
@@ -492,6 +493,7 @@ nextButton.addEventListener("click", async () => {
     document.getElementById("feedback-cause").textContent = result.reasons[0] || "Няма допълнително събитие.";
     turnFeedback.hidden = false;
     updateNextButton();
+    document.getElementById("feedback-continue").focus();
   }
 
   if (game.simulationId) {

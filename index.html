@@ -152,7 +152,7 @@
             <path d="M0 590v-65q139-35 269 3l-61 62Z" fill="#1b453a" opacity=".72"/><use href="#round-tree" transform="translate(45 580) scale(1.33)"/><use href="#pine-tree" transform="translate(944 560) scale(1.18)"/>
           </svg>
           <div class="scene-bottomline"><span id="scene-caption">Вода 60 · Трева 200 · Зайци 20 · Лисици 4</span><span class="scene-scale">ДОЛИНА 01 / НАБЛЮДЕНИЕ</span></div>
-          <div id="turn-feedback" class="turn-feedback" hidden><span class="eyebrow">ПОСЛЕДИЦИ ОТ ХОДА</span><h3 id="feedback-title">Долината се промени</h3><p id="feedback-changes"></p><p id="feedback-cause"></p><button id="feedback-continue" class="button button-primary" type="button">▶ ПРОДЪЛЖИ</button></div>
+          <div id="turn-feedback" class="turn-feedback" role="dialog" aria-labelledby="feedback-title" hidden><span class="eyebrow">ПОСЛЕДИЦИ ОТ ХОДА</span><h3 id="feedback-title">Долината се промени</h3><p id="feedback-changes"></p><p id="feedback-cause"></p><button id="feedback-continue" class="button button-primary" type="button">▶ ПРОДЪЛЖИ</button></div>
         </section>
 
         <aside class="game-console" aria-label="Управление на хода">
@@ -220,7 +220,7 @@
     <section id="result-screen" aria-labelledby="result-title" hidden>
       <div class="card result-card">
         <p class="eyebrow">Край на мисията</p>
-        <h2 id="result-title">Резултат</h2>
+        <h2 id="result-title" tabindex="-1">Резултат</h2>
         <p id="result-mission" class="small-text"></p>
         <h3>Долината след 10 хода</h3>
         <div id="result-resources" class="result-resources" aria-label="Крайни стойности на показателите"></div>
