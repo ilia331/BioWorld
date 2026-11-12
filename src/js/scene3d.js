@@ -44,12 +44,46 @@ const MOODS = {
   disease: { top: 0x5e7b78, horizon: 0xc0c8b0, bottom: 0x949f82, sun: 0xeee6d2, sunI: 1.8, hemi: 0.4,  env: 0.4,  exposure: 0.95, fog: 0.9 },
 };
 
-// Надписи при докосване: български термин + английски в скоби.
-const TIPS = {
-  water: { icon: "water-icon", text: (s) => `Вода (water): ${s.water} / 100. Без вода тревата не расте.` },
-  grass: { icon: "grass-icon", text: (s) => `Трева (grass, producer): ${s.grass} / 500. Храна за зайците.` },
-  rabbits: { icon: "rabbit-icon", text: (s) => `Зайци (rabbits, herbivores): ${s.rabbits}. 1 модел = ${RABBITS_PER_MODEL} зайци. Ядат трева.` },
-  foxes: { icon: "fox-icon", text: (s) => `Лисици (foxes, predators): ${s.foxes}. 1 модел = 1 лисица. Ловуват зайци.` },
+// ---------- Интерактивност: текстове и връзки ----------
+const ACCENT = 0xf0c774;        // златният акцент от интерфейса (подсветка)
+const GHOST = 0xf4efda;         // кремав „призрачен“ цвят (preview)
+const CHAIN = ["water", "grass", "rabbits", "foxes"];          // хранителната верига
+const LINK_TEXT = { grass: "нужна за растежа", rabbits: "храна", foxes: "плячка" }; // надпис на стрелката към вида
+const NAMES = { water: "вода", grass: "трева", rabbits: "зайци", foxes: "лисици" };
+const ACTION_NAMES = { "plant-grass": "засаждане", "restore-water": "водоем", "add-rabbits": "нови зайци", "add-foxes": "нови лисици" };
+
+// Числата се четат от SIM в simulation.js (само четене) — така текстът винаги съвпада с правилата.
+function rule(action, key, fallback) {
+  const actions = typeof SIM !== "undefined" ? SIM.actions : null;
+  return actions && actions[action] && actions[action][key] !== undefined ? actions[action][key] : fallback;
+}
+
+// Обяснителна карта за всеки вид: роля във веригата и как действията го променят.
+const INFO = {
+  water: {
+    icon: "water-icon", title: "Вода (Water)", max: 100,
+    role: "Условие на средата (environment). Колкото повече вода, толкова по-бързо расте тревата. При 0 вода тревата не расте.",
+    actions: () => `„Възстанови водоем“ дава +${rule("restore-water", "water", 25)}. „Засади трева“ струва ${-rule("plant-grass", "water", -10)} вода. Дъждът добавя, сушата и изпарението отнемат.`,
+    from: "дъжд, суша, водоема", to: "трева",
+  },
+  grass: {
+    icon: "grass-icon", title: "Трева (Grass)", max: 500,
+    role: "Производител (producer). Расте с вода и слънце и е храна за зайците. Близо до 500 расте по-бавно — няма място.",
+    actions: () => `„Засади трева“ дава +${rule("plant-grass", "grass", 50)}. Много зайци я изяждат по-бързо, отколкото пораства.`,
+    from: "вода, зайци (ядат я)", to: "зайци",
+  },
+  rabbits: {
+    icon: "rabbit-icon", title: "Зайци (Rabbits)",
+    role: `Тревопасни (herbivores). Ядат трева; ако тя не стига, гладуват. Лисиците ги ловуват. 1 модел = ${RABBITS_PER_MODEL} зайци.`,
+    actions: () => `„Добави зайци“ дава +${rule("add-rabbits", "rabbits", 6)}. Повече зайци → по-малко трева и повече храна за лисиците.`,
+    from: "трева, лисици (ловуват ги)", to: "трева, лисици",
+  },
+  foxes: {
+    icon: "fox-icon", title: "Лисици (Foxes)",
+    role: "Хищници (predators). Ловуват зайци. Без зайци гладуват и не се размножават.",
+    actions: () => `„Добави лисици“ дава +${rule("add-foxes", "foxes", 2)}. Повече лисици → по-малко зайци → тревата си почива.`,
+    from: "зайци", to: "зайци",
+  },
 };
 
 const svg = document.getElementById("valley-scene");
@@ -92,6 +126,23 @@ if (new URLSearchParams(location.search).has("fps") && box) {
 const timeUniform = { value: 0 };
 // Цветът на хоризонта — водата го отразява при полегат поглед (френел).
 const skyReflection = { value: new THREE.Color(0xd0d7ba) };
+// Дебелина на светещия контур около избрания вид (пулсира леко).
+const outlineWidth = { value: 0.06 };
+
+// Състояние на интерактивността. Нищо от тук не се връща към играта.
+let selected = null;                 // "water" | "grass" | "rabbits" | "foxes" | null
+let selectionChangedAt = -10000;
+let history = [], entries = [];      // game.history и game.entries — само за четене
+let viewTurn = null;                 // null = „сега“; число = преглед на минал ход
+let previewEffects = null;           // пряк ефект на избраното действие (B)
+let effectUntil = 0, effectMode = null, effectCenter = new THREE.Vector3();
+const pendingAfterFeedback = [];     // числа/балончета, които чакат прозореца „Последици“ да се затвори
+const waterTint = new THREE.Color(), grassTint = new THREE.Color();
+const dim = { water: 1, grass: 1, rabbits: 1, foxes: 1 };   // 1 = нормално, <1 = приглушено
+let rabbitHull, foxHull, waterRing, ghostRing, ghostRabbits, ghostFoxes, ghostGrass, arrows, particles;
+let layer, card, timeline, bubble, previewChip;
+let arrowsDirty = false;
+const floating = [];                 // изскачащи числа и надписи, които следват 3D точка
 
 // ---------- Помощни функции ----------
 
@@ -491,12 +542,15 @@ function init() {
   rain.frustumCulled = false;
   scene.add(rain);
 
+  setupInteraction();
   setupComposer();
   applyMood(mood);
   setupControls();
   new ResizeObserver(resize).observe(box);
-  new IntersectionObserver((entries) => {
-    inView = entries[0].isIntersecting;
+  new IntersectionObserver((observed) => {
+    inView = observed[0].isIntersecting;
+    // Долината вече не се вижда (напр. екранът с мисиите) → затваряме картата.
+    if (!inView) select(null);
     requestRender();
   }).observe(box);
   reducedMotion.addEventListener("change", requestRender);
@@ -535,6 +589,8 @@ function resize() {
   if (height < 300) distance += 4;
   camera.userData.distance = distance;
   camera.updateProjectionMatrix();
+  cardPlace = null;
+  if (selected) updateCard(); // ширината може да смени режима „карта до обекта“ ↔ „долен лист“
   renderer.shadowMap.needsUpdate = true;
   requestRender();
 }
@@ -592,18 +648,23 @@ function apply(values) {
   water.visible = values.water > 0.5;
   water.position.y = waterLevel(values.water);
   // Малко вода → плитка и мътна; много вода → дълбока синьо-зелена.
-  water.material.color.lerpColors(COLOR.waterMurky, COLOR.waterDeep, smoothstep(0.1, 0.6, w));
+  // (Крайният цвят се смята в updateHighlight — там се добавя и приглушаването при избор.)
+  waterTint.lerpColors(COLOR.waterMurky, COLOR.waterDeep, smoothstep(0.1, 0.6, w));
 
   // Под 35 вода поляната и тревата пожълтяват — вижда се, че им липсва вода.
   const dryness = smoothstep(35, 0, values.water);
   terrain.material.color.lerpColors(COLOR.white, COLOR.dryTint, dryness * 0.8);
   outerGround.material.color.copy(COLOR.meadow).multiply(terrain.material.color);
-  grassMesh.material.color.lerpColors(COLOR.white, COLOR.grassDry, dryness * 0.85);
+  grassTint.lerpColors(COLOR.white, COLOR.grassDry, dryness * 0.85);
   placeInstances(grassMesh, grassSpots, MAX_GRASS * values.grass / 500, 0.7 + 0.9 * values.grass / 500);
 
   placeInstances(rabbitMesh, rabbitSpots, values.rabbitModels, 1, rabbitBlobs, 0.75);
   placeInstances(foxMesh, foxSpots, values.foxModels, 1, foxBlobs, 0.9);
+  // Контурите използват същите матрици като животните — броят им трябва да съвпада.
+  rabbitHull.count = rabbitMesh.count;
+  foxHull.count = foxMesh.count;
   renderer.shadowMap.needsUpdate = true;
+  arrowsDirty = true;
 }
 
 // Атмосфера: небе, мъгла, слънце, отражения и експонация.
@@ -640,7 +701,8 @@ function motionAllowed() {
 }
 
 function busy(now) {
-  return (target && now - animStart < ANIM_MS) || (moodTarget && now - moodStart < MOOD_MS) || now < rainUntil || now < sickUntil;
+  return (target && now - animStart < ANIM_MS) || (moodTarget && now - moodStart < MOOD_MS) || now < rainUntil || now < sickUntil
+    || now < effectUntil || now - selectionChangedAt < 400;
 }
 
 // При разрешено движение рисуваме постоянно (трева, вода, дишане) — но само докато
@@ -707,6 +769,7 @@ function frame(now) {
   }
 
   // Болест: засегнатият вид мига в червено (без мигане при „намалено движение“).
+  // Светенето при избор се добавя после в updateHighlight.
   for (const mesh of [grassMesh, rabbitMesh, foxMesh]) mesh.material.emissive.setHex(0x000000);
   if (sickMaterial && now < sickUntil) {
     const pulse = motionAllowed() ? (Math.sin(now / 110) + 1) / 2 : 1;
@@ -724,6 +787,9 @@ function frame(now) {
     focus.z + Math.sin(a) * distance * Math.cos(tilt),
   );
   camera.lookAt(focus);
+  camera.updateMatrixWorld();
+
+  updateInteraction(now, dt);
 
   if (composer) composer.render();
   else renderer.render(scene, camera);
@@ -761,13 +827,28 @@ function setupControls() {
   canvas.style.touchAction = "none";
   let down = null;
 
+  let lastHover = 0;
+
+  // pointerdown: запомняме какво е под пръста (Raycaster). Изборът става чак при
+  // pointerup, защото тогава знаем дали е било докосване, или въртене.
   canvas.addEventListener("pointerdown", (event) => {
-    down = { x: event.clientX, y: event.clientY, angle, tilt };
+    down = { x: event.clientX, y: event.clientY, angle, tilt, kind: pick(event), dragging: false };
     lastUserTouch = performance.now();
     canvas.setPointerCapture(event.pointerId);
   });
   canvas.addEventListener("pointermove", (event) => {
-    if (!down) return;
+    if (!down) {
+      // Мишка без натиснат бутон: курсор „ръка“ над избираем обект (най-много ~12 пъти в секунда).
+      if (event.pointerType === "mouse" && performance.now() - lastHover > 80) {
+        lastHover = performance.now();
+        canvas.style.cursor = pick(event) ? "pointer" : "grab";
+      }
+      return;
+    }
+    // Преместване над ~8px = въртене на камерата, не избор.
+    if (!down.dragging && Math.hypot(event.clientX - down.x, event.clientY - down.y) < 8) return;
+    down.dragging = true;
+    canvas.style.cursor = "grabbing";
     angle = down.angle + (event.clientX - down.x) * 0.008;
     // Наклонът е ограничен: не гледаме под земята или право отгоре.
     tilt = Math.min(1.05, Math.max(0.28, down.tilt + (event.clientY - down.y) * 0.004));
@@ -776,14 +857,25 @@ function setupControls() {
   });
   const end = (event) => {
     if (!down) return;
-    const moved = Math.hypot(event.clientX - down.x, event.clientY - down.y);
-    if (event.type === "pointerup" && moved < 8) showTipAt(event);
+    if (event.type === "pointerup" && !down.dragging) select(down.kind && down.kind === selected ? null : down.kind);
     down = null;
+    canvas.style.cursor = "grab";
     lastUserTouch = performance.now();
     requestRender();
   };
   canvas.addEventListener("pointerup", end);
   canvas.addEventListener("pointercancel", end);
+
+  // Клавиатура: Tab до долината, после 1–4 избира вид, стрелките сменят, Esc затваря.
+  canvas.tabIndex = 0;
+  canvas.addEventListener("keydown", (event) => {
+    const index = CHAIN.indexOf(selected);
+    if (["1", "2", "3", "4"].includes(event.key)) select(CHAIN[Number(event.key) - 1]);
+    else if (event.key === "ArrowRight") select(CHAIN[(index + 1) % CHAIN.length]);
+    else if (event.key === "ArrowLeft") select(CHAIN[(index + CHAIN.length - 1) % CHAIN.length]);
+    else return;
+    event.preventDefault();
+  });
 }
 
 let tip = null, tipTimer = null;
@@ -810,23 +902,622 @@ function showTip(iconClass, text, left, top) {
   tipTimer = setTimeout(() => { tip.hidden = true; }, 3500);
 }
 
-function showTipAt(event) {
-  if (!latestState) return;
+// Какво е под пръста/мишката: "water" | "grass" | "rabbits" | "foxes" | null (празно).
+// При зайци/лисици Raycaster връща instanceId, но обясняваме ВИДА, не отделното животно.
+const pointerNdc = new THREE.Vector2();
+function pick(event) {
   const rect = renderer.domElement.getBoundingClientRect();
-  const pointer = new THREE.Vector2(
-    ((event.clientX - rect.left) / rect.width) * 2 - 1,
-    -((event.clientY - rect.top) / rect.height) * 2 + 1,
-  );
-  raycaster.setFromCamera(pointer, camera);
+  pointerNdc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
+  raycaster.setFromCamera(pointerNdc, camera);
   const hit = raycaster.intersectObjects([water, foxMesh, rabbitMesh, grassMesh, terrain], false)[0];
-  if (!hit) return;
-  let kind = "grass";
-  if (hit.object === foxMesh) kind = "foxes";
-  else if (hit.object === rabbitMesh) kind = "rabbits";
-  else if (hit.object === water || basinDistance(hit.point.x, hit.point.z) < 1) kind = "water";
-  const left = Math.min(rect.width - 240, Math.max(8, event.clientX - rect.left - 115));
-  const top = Math.min(rect.height - 90, Math.max(50, event.clientY - rect.top - 80));
-  showTip(TIPS[kind].icon, TIPS[kind].text(latestState), left, top);
+  if (!hit) return null;
+  if (hit.object === foxMesh) return "foxes";
+  if (hit.object === rabbitMesh) return "rabbits";
+  if (hit.object === grassMesh) return "grass";
+  if (hit.object === water || basinDistance(hit.point.x, hit.point.z) < 1) return "water";
+  // Поляна: броим я за трева само ако наблизо има туфа — иначе е „празно“ (деселект).
+  for (let i = 0; i < grassMesh.count; i++) {
+    if (Math.hypot(grassSpots[i].x - hit.point.x, grassSpots[i].z - hit.point.z) < 0.9) return "grass";
+  }
+  return null;
+}
+
+// ---------- Интерактивност (A–F) ----------
+
+const PARTICLES = 180;
+const UP = new THREE.Vector3(0, 1, 0);
+const tmpV = new THREE.Vector3(), tmpColor = new THREE.Color(), accentColor = new THREE.Color(ACCENT);
+const arrowHeadGeometry = new THREE.ConeGeometry(0.22, 0.5, 12);
+let arrowStrong, arrowSoft, headStrong, headSoft, range, timelineOutput, nowButton;
+let lastEventType = "none", lastPreview = null, scrubTimer = null, bubbleTimer = null;
+
+// Светещ контур: копие на модела, „надуто“ по нормалите и рисувано отзад (inverted hull).
+// Едно допълнително рисуване вместо OutlinePass — евтино и на телефон, еднакво навсякъде.
+function makeHull(mesh, key) {
+  const material = new THREE.MeshBasicMaterial({ color: ACCENT, side: THREE.BackSide, toneMapped: false, fog: false });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uTime = timeUniform;
+    shader.uniforms.uOutline = outlineWidth;
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nuniform float uTime;\nuniform float uOutline;")
+      .replace("#include <begin_vertex>", `#include <begin_vertex>\n${PHASE}\ntransformed.y *= 1.0 + 0.03 * sin(uTime * 2.2 + phase);\ntransformed += normalize(normal) * uOutline;`);
+  };
+  material.customProgramCacheKey = () => key;
+  const hull = new THREE.InstancedMesh(mesh.geometry, material, MAX_MODELS);
+  hull.instanceMatrix = mesh.instanceMatrix; // същите места като животните
+  hull.frustumCulled = false;
+  hull.count = 0;
+  hull.visible = false;
+  scene.add(hull);
+  return hull;
+}
+
+// Стрелка с „течащи“ светли ивици по посоката на зависимостта.
+function arrowMaterial(opacity) {
+  return new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    depthTest: false, // връзките са „схема“ върху света — винаги видими
+    uniforms: { uTime: timeUniform, uColor: { value: new THREE.Color(ACCENT) }, uOpacity: { value: opacity } },
+    vertexShader: "varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+    fragmentShader: `
+      uniform float uTime; uniform vec3 uColor; uniform float uOpacity; varying vec2 vUv;
+      void main() {
+        float flow = 0.5 + 0.5 * sin(vUv.x * 22.0 - uTime * 5.0);
+        float start = smoothstep(0.0, 0.06, vUv.x);
+        gl_FragColor = vec4(uColor * (0.85 + 0.35 * flow), uOpacity * (0.45 + 0.55 * flow) * start);
+        #include <colorspace_fragment>
+      }`,
+  });
+}
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  return node;
+}
+
+function icon(iconClass) {
+  const node = element("i", `resource-icon ${iconClass}`);
+  node.setAttribute("aria-hidden", "true");
+  return node;
+}
+
+// Създава допълнителните 3D обекти и HTML слоя над платното. Вика се веднъж от init().
+function setupInteraction() {
+  // A. Подсветка: контури за животните и златен ръб по брега на водата.
+  rabbitHull = makeHull(rabbitMesh, "hull-rabbit");
+  foxHull = makeHull(foxMesh, "hull-fox");
+  waterRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.965, 1, 96).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, depthWrite: false, toneMapped: false }),
+  );
+  waterRing.position.set(POND.x, 0, POND.z);
+  waterRing.visible = false;
+  scene.add(waterRing);
+
+  // B. Призрачни обекти за preview: новите животни/трева и бъдещият бряг.
+  const ghostMaterial = () => new THREE.MeshBasicMaterial({ color: GHOST, transparent: true, opacity: 0.4, depthWrite: false, toneMapped: false });
+  ghostRabbits = new THREE.InstancedMesh(rabbitMesh.geometry, ghostMaterial(), MAX_MODELS);
+  ghostFoxes = new THREE.InstancedMesh(foxMesh.geometry, ghostMaterial(), MAX_MODELS);
+  ghostGrass = new THREE.InstancedMesh(grassMesh.geometry, ghostMaterial(), MAX_GRASS);
+  for (const mesh of [ghostRabbits, ghostFoxes, ghostGrass]) {
+    mesh.frustumCulled = false;
+    mesh.count = 0;
+    scene.add(mesh);
+  }
+  // Бъдещият бряг се вижда и през водата/терена (depthTest: false).
+  ghostRing = new THREE.Mesh(waterRing.geometry, new THREE.MeshBasicMaterial({ color: GHOST, transparent: true, opacity: 0.85, depthTest: false, depthWrite: false, toneMapped: false }));
+  ghostRing.position.set(POND.x, 0, POND.z);
+  ghostRing.renderOrder = 2;
+  ghostRing.visible = false;
+  scene.add(ghostRing);
+
+  // C. Стрелки на причинните връзки.
+  arrows = new THREE.Group();
+  scene.add(arrows);
+  arrowStrong = arrowMaterial(0.95);
+  arrowSoft = arrowMaterial(0.45);
+  headStrong = new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.95, toneMapped: false, depthWrite: false, depthTest: false });
+  headSoft = new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.5, toneMapped: false, depthWrite: false, depthTest: false });
+
+  // F. Частици: прах при суша, спори при болест (дъждът има свои чертички).
+  const particleGeometry = new THREE.BufferGeometry();
+  particleGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(PARTICLES * 3), 3));
+  particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ size: 0.1, transparent: true, depthWrite: false }));
+  particles.visible = false;
+  particles.frustumCulled = false;
+  scene.add(particles);
+
+  // HTML слой над платното: карта, числа, балонче, лента с ходовете.
+  layer = element("div", "scene3d-layer");
+  box.append(layer);
+
+  card = element("section", "scene3d-card");
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-labelledby", "scene3d-card-title");
+  card.hidden = true;
+  const close = element("button", "scene3d-card-close", "×");
+  close.type = "button";
+  close.setAttribute("aria-label", "Затвори обяснението");
+  close.addEventListener("click", () => select(null));
+  const title = element("h4", "scene3d-card-title");
+  title.id = "scene3d-card-title";
+  const value = element("p", "scene3d-card-value");
+  value.setAttribute("aria-live", "polite");
+  card.append(close, title, value, element("p", "scene3d-card-role"), element("p", "scene3d-card-actions"), element("p", "scene3d-card-chain"));
+  layer.append(card);
+
+  bubble = element("p", "scene3d-bubble");
+  bubble.setAttribute("role", "status");
+  bubble.hidden = true;
+  previewChip = element("p", "scene3d-chip", "Преглед: пряк ефект на действието и на времето");
+  previewChip.hidden = true;
+  layer.append(bubble, previewChip);
+
+  // D. Лента с изиграните ходове.
+  timeline = element("div", "scene3d-timeline");
+  timeline.hidden = true;
+  const label = element("label", null, "Ходове");
+  label.htmlFor = "scene3d-scrub";
+  range = element("input");
+  Object.assign(range, { id: "scene3d-scrub", type: "range", min: "0", max: "0", step: "1", value: "0" });
+  range.addEventListener("input", () => scrubTo(Number(range.value)));
+  timelineOutput = element("output");
+  timelineOutput.htmlFor = "scene3d-scrub";
+  nowButton = element("button", null, "Сега");
+  nowButton.type = "button";
+  nowButton.addEventListener("click", () => scrubTo(history.length - 1));
+  timeline.append(label, range, timelineOutput, nowButton);
+  layer.append(timeline);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && selected) select(null);
+  });
+  // Числата и балончето чакат прозореца „Последици от хода“ да се затвори — иначе са под него.
+  const feedback = document.getElementById("turn-feedback");
+  if (feedback) {
+    new MutationObserver(() => { if (feedback.hidden) flushPending(); }).observe(feedback, { attributes: true, attributeFilter: ["hidden"] });
+  }
+}
+
+function feedbackOpen() {
+  const feedback = document.getElementById("turn-feedback");
+  return Boolean(feedback && !feedback.hidden);
+}
+
+function queueAfterFeedback(fn) {
+  if (feedbackOpen()) pendingAfterFeedback.push(fn);
+  else fn();
+}
+
+function flushPending() {
+  while (pendingAfterFeedback.length) pendingAfterFeedback.shift()();
+  requestRender();
+}
+
+// Какво се вижда в момента: „сега“ или избраният минал ход.
+function viewedState() {
+  return viewTurn === null ? latestState : history[viewTurn];
+}
+
+// Плавен преход към състояние + атмосфера на събитието. Използва се за нов ход и за лентата.
+function goTo(state, eventType, animate) {
+  renderer.domElement.setAttribute("aria-label",
+    `3D долина: вода ${state.water} от 100, трева ${state.grass}, зайци ${state.rabbits}, лисици ${state.foxes}. Клавиши 1–4 избират вид.`);
+  const next = toShown(state);
+  const now = performance.now();
+  if (!animate || !shown) {
+    shown = next;
+    target = null;
+    apply(shown);
+  } else {
+    from = shown;
+    target = next;
+    animStart = now;
+  }
+  const moodNext = MOODS[eventType] || MOODS.none;
+  if (!animate) {
+    mood = { ...moodNext };
+    applyMood(mood);
+    moodTarget = null;
+  } else {
+    moodFrom = { ...mood };
+    moodTarget = moodNext;
+    moodStart = now;
+  }
+  arrowsDirty = true;
+  requestRender();
+}
+
+// Котва = точка над вида в света. За трева/животни: видимият модел, най-близо до „зоната“ на вида —
+// така стрелките и числата сочат към истински обект, а веригата образува ясна дъга около водоема.
+const ZONES = { grass: new THREE.Vector3(2.2, 0, -2.6), rabbits: new THREE.Vector3(3.8, 0, 1.6), foxes: new THREE.Vector3(0.6, 0, 4.6) };
+const HEIGHTS = { grass: 0.75, rabbits: 0.85, foxes: 1.0 };
+function anchor(kind, out) {
+  if (kind === "water") return out.set(POND.x, (water.visible ? water.position.y : -POND.depth) + 0.4, POND.z);
+  const spots = { grass: grassSpots, rabbits: rabbitSpots, foxes: foxSpots }[kind];
+  const count = { grass: grassMesh.count, rabbits: rabbitMesh.count, foxes: foxMesh.count }[kind];
+  const zone = ZONES[kind];
+  let best = null, bestDistance = Infinity;
+  for (let i = 0; i < count; i++) {
+    const d = (spots[i].x - zone.x) ** 2 + (spots[i].z - zone.z) ** 2;
+    if (d < bestDistance) { bestDistance = d; best = spots[i]; }
+  }
+  if (!best) return out.set(zone.x, terrainHeight(zone.x, zone.z) + 0.4, zone.z);
+  return out.set(best.x, best.y + HEIGHTS[kind], best.z);
+}
+
+// Радиус на водата на дадено ниво: там, където коритото е точно толкова дълбоко.
+function shoreRadius(level) {
+  return POND.radius * Math.min(1.02, Math.sqrt(Math.max(0.0001, 1 + level / POND.depth)));
+}
+
+// 3D точка → пиксели в платното.
+const projected = new THREE.Vector3();
+function toScreen(world) {
+  projected.copy(world).project(camera);
+  return {
+    x: ((projected.x + 1) / 2) * box.clientWidth,
+    y: ((1 - projected.y) / 2) * box.clientHeight,
+    onScreen: projected.z < 1 && Math.abs(projected.x) < 1.05 && Math.abs(projected.y) < 1.05,
+  };
+}
+
+// Надпис, който следва 3D точка (фиксирана) или вид (котвата му се мести с анимацията).
+function addFloating(node, where, until, group) {
+  layer.append(node);
+  floating.push({ node, kind: typeof where === "string" ? where : null, world: typeof where === "string" ? null : where.clone(), until, group });
+}
+
+function removeFloating(group) {
+  for (let i = floating.length - 1; i >= 0; i--) {
+    if (floating[i].group === group) {
+      floating[i].node.remove();
+      floating.splice(i, 1);
+    }
+  }
+}
+
+// ----- A. Избор и обяснителна карта -----
+
+function select(kind) {
+  if (kind === selected) return;
+  selected = kind;
+  cardPlace = null;
+  selectionChangedAt = performance.now();
+  arrowsDirty = true;
+  updateCard();
+  requestRender();
+}
+
+function updateCard() {
+  if (!card) return;
+  if (!selected) {
+    card.hidden = true;
+    removeFloating("link");
+    return;
+  }
+  const info = INFO[selected], state = viewedState();
+  const title = card.querySelector(".scene3d-card-title");
+  title.replaceChildren(icon(info.icon), document.createTextNode(` ${info.title}`));
+  const value = info.max ? `${state[selected]} / ${info.max}` : String(state[selected]);
+  card.querySelector(".scene3d-card-value").textContent = viewTurn === null ? `Сега: ${value}` : `На ход ${viewTurn}: ${value}`;
+  card.querySelector(".scene3d-card-role").textContent = info.role;
+  card.querySelector(".scene3d-card-actions").textContent = info.actions();
+  card.querySelector(".scene3d-card-chain").textContent = `Зависи от: ${info.from} · Влияе на: ${info.to}`;
+  // Тесен телефон → долен лист (bottom sheet) над конзолата, за да не закрива долината.
+  const sheet = box.clientWidth < 560;
+  card.classList.toggle("is-sheet", sheet);
+  const host = sheet ? document.body : layer;
+  if (card.parentNode !== host) host.append(card);
+  card.hidden = false;
+}
+
+// Картата стои до обекта, но винаги вътре в долината и без да закрива видовете и стрелките,
+// които обяснява. Пробваме няколко места и взимаме най-близкото, което не покрива нищо важно.
+let cardPlace = null;
+function positionCard() {
+  if (!selected || card.hidden || card.classList.contains("is-sheet")) return;
+  const p = toScreen(anchor(selected, tmpV));
+  const width = card.offsetWidth, height = card.offsetHeight;
+  const w = box.clientWidth, h = box.clientHeight;
+  const gap = 26, minTop = 50, maxBottom = h - 48;
+  const clampPlace = ([left, top]) => [Math.min(w - width - 8, Math.max(8, left)), Math.min(maxBottom - height, Math.max(minTop, top))];
+  const candidates = [
+    [p.x + gap, p.y - height / 2], [p.x - width - gap, p.y - height / 2],
+    [p.x - width / 2, p.y - height - gap], [p.x - width / 2, p.y + gap],
+    [8, minTop], [w - width - 8, minTop], [8, maxBottom - height], [w - width - 8, maxBottom - height],
+  ].map(clampPlace);
+  // Важните точки: котвите на четирите вида и надписите на стрелките.
+  const important = CHAIN.map((kind) => toScreen(anchor(kind, new THREE.Vector3())));
+  for (const item of floating) if (item.group === "link") important.push(toScreen(item.world));
+  const score = ([left, top]) => {
+    let covered = 0;
+    for (const point of important) {
+      if (point.x > left - 12 && point.x < left + width + 12 && point.y > top - 12 && point.y < top + height + 12) covered += 1;
+    }
+    return covered * 1000 + Math.hypot(left + width / 2 - p.x, top + height / 2 - p.y);
+  };
+  // Мястото се сменя само при осезаемо по-добър вариант — иначе картата би „подскачала“ при дрейфа на камерата.
+  let best = candidates[0];
+  for (const place of candidates) if (score(place) < score(best)) best = place;
+  if (!cardPlace || score(best) < score(cardPlace) - 40) cardPlace = best;
+  card.style.transform = `translate(${Math.round(cardPlace[0])}px, ${Math.round(cardPlace[1])}px)`;
+}
+
+// Подсветка: избраният вид свети и пулсира, другите се приглушават.
+function updateHighlight(now, dt) {
+  const pulse = motionAllowed() ? (Math.sin(now / 260) + 1) / 2 : 0.5;
+  const speed = Math.min(1, dt * 8 || 1);
+  for (const kind of CHAIN) {
+    const goal = selected && kind !== selected ? 0.5 : 1;
+    dim[kind] += (goal - dim[kind]) * speed;
+  }
+  water.material.color.copy(waterTint).multiplyScalar(dim.water);
+  grassMesh.material.color.copy(grassTint).multiplyScalar(dim.grass);
+  rabbitMesh.material.color.setScalar(dim.rabbits);
+  foxMesh.material.color.setScalar(dim.foxes);
+
+  if (selected === "grass") grassMesh.material.emissive.add(tmpColor.copy(accentColor).multiplyScalar(0.1 + 0.12 * pulse));
+  rabbitHull.visible = selected === "rabbits";
+  foxHull.visible = selected === "foxes";
+  outlineWidth.value = 0.05 + 0.025 * pulse;
+
+  waterRing.visible = selected === "water" && water.visible;
+  if (waterRing.visible) {
+    const r = shoreRadius(water.position.y) + 0.06 * pulse;
+    waterRing.scale.set(r, 1, r);
+    waterRing.position.y = water.position.y + 0.02;
+  }
+}
+
+// ----- C. Причинни връзки -----
+
+// Стрелки по веригата вода → трева → зайци → лисици: ярки до избрания вид (от какво зависи)
+// и една по-бледа след него (на какво влияе). Строят се наново, когато животните се преместят.
+function rebuildArrows() {
+  arrowsDirty = false;
+  for (const child of [...arrows.children]) {
+    if (child.geometry !== arrowHeadGeometry) child.geometry.dispose();
+    arrows.remove(child);
+  }
+  removeFloating("link");
+  if (!selected) return;
+  const index = CHAIN.indexOf(selected);
+  const links = [];
+  for (let i = 0; i < index; i++) links.push([CHAIN[i], CHAIN[i + 1], true]);
+  if (index < CHAIN.length - 1) links.push([selected, CHAIN[index + 1], false]);
+  for (const [fromKind, toKind, strong] of links) {
+    const start = anchor(fromKind, new THREE.Vector3());
+    const end = anchor(toKind, new THREE.Vector3());
+    const middle = start.clone().lerp(end, 0.5);
+    middle.y += 0.8 + start.distanceTo(end) * 0.22;
+    const curve = new THREE.QuadraticBezierCurve3(start, middle, end);
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, strong ? 0.09 : 0.06, 8), strong ? arrowStrong : arrowSoft);
+    const head = new THREE.Mesh(arrowHeadGeometry, strong ? headStrong : headSoft);
+    head.position.copy(curve.getPoint(0.96));
+    head.quaternion.setFromUnitVectors(UP, curve.getTangent(0.96).normalize());
+    tube.renderOrder = head.renderOrder = 3;
+    arrows.add(tube, head);
+    const text = element("span", `scene3d-label scene3d-link${strong ? "" : " is-soft"}`, `${NAMES[fromKind]} → ${LINK_TEXT[toKind]}`);
+    addFloating(text, curve.getPoint(0.5), Infinity, "link");
+  }
+}
+
+// ----- B. Preview на действието -----
+
+// Пряк ефект на действието и на събитието следващия ход. Числата идват от SIM и eventForTurn
+// (simulation.js, само четене). Пълният резултат НЕ се показва — той е за прогнозата на ученика.
+function directEffects(action, state, mission) {
+  const effects = { water: [], grass: [], rabbits: [], foxes: [] };
+  const fromAction = (typeof SIM !== "undefined" && SIM.actions[action]) || {};
+  for (const kind of CHAIN) {
+    if (fromAction[kind]) effects[kind].push({ value: fromAction[kind], text: ACTION_NAMES[action] });
+  }
+  const event = typeof eventForTurn === "function" ? eventForTurn(mission, state.turn + 1) : { type: "none" };
+  if (typeof SIM !== "undefined") {
+    if (event.type === "rain") effects.water.push({ value: SIM.rainWater, text: "дъжд" });
+    if (event.type === "drought") effects.water.push({ value: SIM.droughtWater, text: "суша" });
+    if (event.type === "disease" && effects[event.species]) effects[event.species].push({ percent: -Math.round(SIM.diseaseLoss * 100), text: "болест" });
+  }
+  return effects;
+}
+
+// Призрачни модели само за новите инстанции (от fromCount до toCount).
+function placeGhosts(mesh, spots, fromCount, toCount, heightScale) {
+  const n = Math.min(spots.length, Math.ceil(toCount));
+  for (let i = 0; i < n; i++) {
+    const spot = spots[i];
+    const grow = i < Math.ceil(fromCount) ? 0 : Math.min(1, toCount - i);
+    dummy.position.set(spot.x, spot.y, spot.z);
+    dummy.rotation.set(0, spot.yaw, 0);
+    dummy.scale.set(spot.size * grow, spot.size * grow * heightScale, spot.size * grow);
+    dummy.updateMatrix();
+    mesh.setMatrixAt(i, dummy.matrix);
+  }
+  mesh.count = n;
+  mesh.instanceMatrix.needsUpdate = true;
+}
+
+function setPreview(action, state, mission) {
+  previewEffects = null;
+  removeFloating("ghost");
+  for (const mesh of [ghostRabbits, ghostFoxes, ghostGrass]) mesh.count = 0;
+  ghostRing.visible = false;
+  previewChip.hidden = true;
+  const allowed = typeof actionError !== "function" || !actionError(action, state);
+  if (!action || !state || !mission || viewTurn !== null || !allowed) {
+    requestRender();
+    return;
+  }
+  const effects = directEffects(action, state, mission);
+  const sum = (kind) => effects[kind].reduce((total, effect) => total + (effect.value || 0), 0);
+
+  if (sum("water")) {
+    const level = waterLevel(Math.min(100, Math.max(0, state.water + sum("water"))));
+    const r = shoreRadius(level);
+    ghostRing.scale.set(r, 1, r);
+    ghostRing.position.y = level + 0.02;
+    ghostRing.visible = true;
+  }
+  if (sum("grass") > 0) {
+    const grassHeight = 0.7 + 0.9 * state.grass / 500;
+    placeGhosts(ghostGrass, grassSpots, MAX_GRASS * state.grass / 500, MAX_GRASS * Math.min(500, state.grass + sum("grass")) / 500, grassHeight);
+  }
+  if (sum("rabbits") > 0) placeGhosts(ghostRabbits, rabbitSpots, models(state.rabbits, RABBITS_PER_MODEL), models(state.rabbits + sum("rabbits"), RABBITS_PER_MODEL), 1);
+  if (sum("foxes") > 0) placeGhosts(ghostFoxes, foxSpots, models(state.foxes, FOXES_PER_MODEL), models(state.foxes + sum("foxes"), FOXES_PER_MODEL), 1);
+
+  let any = false;
+  for (const kind of CHAIN) {
+    if (!effects[kind].length) continue;
+    any = true;
+    const net = sum(kind);
+    const percent = effects[kind].find((effect) => effect.percent);
+    const big = percent ? `−${Math.abs(percent.percent)}%` : `${net > 0 ? "+" : "−"}${Math.abs(net)}`;
+    // Един ефект → само причината („засаждане“); няколко → разбивка („водоем +25 · суша −20“).
+    const detail = effects[kind].length === 1 ? effects[kind][0].text
+      : effects[kind].map((effect) => `${effect.text} ${effect.percent ? "−" + Math.abs(effect.percent) + "%" : (effect.value > 0 ? "+" : "−") + Math.abs(effect.value)}`).join(" · ");
+    const node = element("span", `scene3d-label scene3d-ghost ${net > 0 ? "up" : "down"}`);
+    node.append(icon(INFO[kind].icon), element("strong", null, `${net > 0 ? "↑" : "↓"} ${big}`), element("small", null, detail));
+    addFloating(node, kind, Infinity, "ghost");
+  }
+  previewEffects = any ? effects : null;
+  previewChip.hidden = !any;
+  requestRender();
+}
+
+// ----- E. Изскачащи числа -----
+
+function showDeltas(before, after) {
+  removeFloating("delta");
+  const until = performance.now() + 2400;
+  for (const kind of CHAIN) {
+    const diff = after[kind] - before[kind];
+    if (!diff) continue;
+    const node = element("span", `scene3d-label scene3d-delta ${diff > 0 ? "up" : "down"}`);
+    node.append(icon(INFO[kind].icon), element("strong", null, `${diff > 0 ? "+" : "−"}${Math.abs(diff)}`));
+    addFloating(node, kind, until, "delta");
+  }
+  requestRender();
+}
+
+// ----- F. Времето: ефект в сцената + балонче „защо“ -----
+
+function weatherText(event) {
+  const s = typeof SIM !== "undefined" ? SIM : { rainWater: 20, droughtWater: -20, diseaseLoss: 0.3 };
+  if (event.type === "rain") return `🌧 Дъжд (rain): вода +${s.rainWater}. Повече вода → тревата расте по-бързо.`;
+  if (event.type === "drought") return `☀ Суша (drought): вода −${Math.abs(s.droughtWater)}. По-малко вода → тревата расте бавно и пожълтява.`;
+  if (event.type === "disease") {
+    const who = { grass: "тревата", rabbits: "зайците", foxes: "лисиците" }[event.species];
+    const why = {
+      foxes: "По-малко хищници → зайците си отдъхват.",
+      rabbits: "По-малко зайци → лисиците гладуват, а тревата се възстановява.",
+      grass: "По-малко трева → по-малко храна за зайците.",
+    }[event.species];
+    return `🦠 Болест (disease) при ${who}: −${Math.round(s.diseaseLoss * 100)}%. ${why}`;
+  }
+  return "";
+}
+
+function showWeather(event) {
+  if (!event || event.type === "none") return;
+  bubble.textContent = weatherText(event);
+  bubble.hidden = false;
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => { bubble.hidden = true; }, 6000);
+}
+
+// Частиците тръгват от центъра на ефекта; при „намалено движение“ няма частици.
+function startEventEffects(event) {
+  if (!event || event.type === "none") return;
+  const now = performance.now();
+  if (event.type === "rain") rainUntil = motionAllowed() ? now + 2600 : 0;
+  if (event.type === "disease") {
+    sickMaterial = ({ grass: grassMesh, rabbits: rabbitMesh, foxes: foxMesh }[event.species] || {}).material || null;
+    sickUntil = now + 1800;
+  }
+  if (!motionAllowed() || (event.type !== "drought" && event.type !== "disease")) return;
+  effectMode = event.type;
+  effectUntil = now + 2800;
+  if (event.type === "disease") anchor(event.species, effectCenter);
+  else effectCenter.set(0, 0, 0);
+  const spread = event.type === "drought" ? 9 : 1.6;
+  const p = particles.geometry.attributes.position;
+  const random = seeded(Math.floor(now) % 1000 + 1);
+  for (let i = 0; i < PARTICLES; i++) {
+    const a = random() * Math.PI * 2, r = Math.sqrt(random()) * spread;
+    p.setXYZ(i, effectCenter.x + Math.cos(a) * r, (event.type === "drought" ? 0.2 : effectCenter.y - 0.6) + random() * 1.5, effectCenter.z + Math.sin(a) * r);
+  }
+  p.needsUpdate = true;
+  particles.material.color.setHex(event.type === "drought" ? 0xe6cf9a : 0xb0503c);
+  particles.visible = true;
+}
+
+function updateParticles(now, dt) {
+  particles.visible = now < effectUntil;
+  if (!particles.visible) return;
+  const p = particles.geometry.attributes.position;
+  const rise = effectMode === "drought" ? 0.35 : 0.6;
+  for (let i = 0; i < PARTICLES; i++) {
+    p.setY(i, p.getY(i) + rise * dt);
+    p.setX(i, p.getX(i) + Math.sin(now / 700 + i) * 0.2 * dt);
+  }
+  p.needsUpdate = true;
+  particles.material.opacity = 0.8 * Math.min(1, (effectUntil - now) / 800);
+}
+
+// ----- D. Лента с ходовете -----
+
+function updateTimeline() {
+  const max = history.length - 1;
+  timeline.hidden = !show3D || max < 1;
+  range.max = String(Math.max(0, max));
+  range.value = String(viewTurn === null ? max : viewTurn);
+  timelineOutput.textContent = viewTurn === null ? `Ход ${max} · сега` : `Ход ${viewTurn} от ${max}`;
+  nowButton.disabled = viewTurn === null;
+  box.classList.toggle("is-past", viewTurn !== null);
+}
+
+// Връща сцената към минал ход — само изглед, играта и записът не се променят.
+function scrubTo(turn) {
+  const max = history.length - 1;
+  if (!history[turn]) return;
+  viewTurn = turn >= max ? null : turn;
+  const entry = entries[turn - 1];
+  goTo(viewedState(), viewTurn === null ? lastEventType : (entry ? entry.event.type : "none"), true);
+  if (viewTurn === null && lastPreview) setPreview(...lastPreview);
+  else setPreview(null);
+  updateTimeline();
+  updateCard();
+  // Какво се промени в този ход (след кратка пауза, за да не мига при бързо местене).
+  clearTimeout(scrubTimer);
+  scrubTimer = setTimeout(() => { if (turn > 0) showDeltas(history[turn - 1], history[turn]); }, 220);
+}
+
+// ----- Всеки кадър -----
+
+function updateInteraction(now, dt) {
+  if (arrowsDirty && !target) rebuildArrows();
+  updateHighlight(now, dt);
+  // Призраците пулсират леко, за да личи, че са „може би“, а не реалност.
+  const ghostOpacity = motionAllowed() ? 0.3 + 0.15 * Math.sin(now / 300) : 0.38;
+  for (const mesh of [ghostRabbits, ghostFoxes, ghostGrass]) mesh.material.opacity = ghostOpacity;
+  updateParticles(now, dt);
+  for (let i = floating.length - 1; i >= 0; i--) {
+    const item = floating[i];
+    if (now > item.until) {
+      item.node.remove();
+      floating.splice(i, 1);
+      continue;
+    }
+    const p = toScreen(item.kind ? anchor(item.kind, tmpV) : item.world);
+    // Надписът стои центриран точно над точката; CSS анимацията ползва отделното свойство translate.
+    item.node.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px) translate(-50%, -100%)`;
+    item.node.style.visibility = p.onScreen ? "" : "hidden";
+  }
+  positionCard();
 }
 
 // ---------- 2D / 3D ----------
@@ -843,16 +1534,20 @@ function setMode(on) {
   toggle.dataset.mode = on ? "3d" : "2d";
   toggle.setAttribute("aria-label", on ? "Покажи 2D картинката" : "Покажи 3D долината");
   try { localStorage.setItem("bioworld-view", on ? "3d" : "2d"); } catch (error) { /* без запомняне */ }
+  if (!renderer) return;
+  if (!on) select(null);
+  updateTimeline();
   if (on && latestState) {
     resize();
     target = null;
-    shown = toShown(latestState);
+    shown = toShown(viewedState());
     apply(shown);
+    if (lastPreview) setPreview(...lastPreview);
     requestRender();
     if (!hintShown) {
       hintShown = true;
       const short = box.clientWidth < 500;
-      showTip(null, short ? "Завърти с пръст. Докосни за обяснение." : "Завърти долината с пръст. Докосни вода, трева или животно за обяснение.", 12, short ? 46 : 52);
+      showTip(null, short ? "Докосни вода, трева или животно. Плъзни, за да завъртиш." : "Докосни вода, трева или животно за обяснение. Плъзни, за да завъртиш долината.", 12, short ? 46 : 52);
     }
   }
 }
@@ -870,42 +1565,54 @@ if (svg && box && toggle && window.WebGLRenderingContext) {
   window.Scene3D = {
     // state: game.state; event: събитието на изиграния ход или null;
     // instant: true при нова/заредена игра — без анимация.
-    update(state, event, options) {
-      latestState = { ...state };
+    // options.history / options.entries: game.history и game.entries (само за четене, за лентата D).
+    update(state, event, options = {}) {
+      const before = latestState;
+      const after = { ...state };
+      latestState = after;
+      history = options.history || [after];
+      entries = options.entries || [];
+      lastEventType = event ? event.type : "none";
       if (!renderer && startIn3D && !failed && !show3D) setMode(true);
       if (!renderer) return;
-      renderer.domElement.setAttribute("aria-label",
-        `3D долина: вода ${state.water} от 100, трева ${state.grass}, зайци ${state.rabbits}, лисици ${state.foxes}.`);
 
-      const instant = Boolean(options && options.instant) || !shown;
-      const next = toShown(latestState);
+      const instant = Boolean(options.instant) || !shown;
+      viewTurn = null;            // нов ход → обратно към „сега“
+      goTo(after, lastEventType, !instant);
+      setPreview(null);
+      lastPreview = null;
+      updateTimeline();
+      updateCard();
       if (instant) {
-        shown = next;
-        target = null;
-        apply(shown);
-      } else {
-        from = shown;
-        target = next;
-        animStart = performance.now();
-      }
-
-      const type = event ? event.type : "none";
-      const now = performance.now();
-      if (instant) {
-        mood = { ...(MOODS[type] || MOODS.none) };
-        applyMood(mood);
-        moodTarget = null;
-      } else {
-        moodFrom = { ...mood };
-        moodTarget = MOODS[type] || MOODS.none;
-        moodStart = now;
-      }
-      rainUntil = type === "rain" && motionAllowed() ? now + 2600 : 0;
-      if (type === "disease") {
-        sickMaterial = ({ grass: grassMesh, rabbits: rabbitMesh, foxes: foxMesh }[event.species] || {}).material || null;
-        sickUntil = now + 1600;
+        // Нова или заредена игра: без стари числа, балончета и ефекти.
+        pendingAfterFeedback.length = 0;
+        removeFloating("delta");
+        bubble.hidden = true;
+        effectUntil = rainUntil = sickUntil = 0;
+      } else if (before) {
+        // Прозорецът „Последици от хода“ се отваря веднага след това — изчакваме го.
+        setTimeout(() => queueAfterFeedback(() => {
+          startEventEffects(event);
+          showDeltas(before, after);
+          showWeather(event);
+        }), 0);
       }
       requestRender();
+    },
+    // B. main.js съобщава избраното действие (или null при отказ/смяна).
+    preview(action, state, mission) {
+      lastPreview = action ? [action, { ...state }, mission] : null;
+      if (renderer && show3D) setPreview(action, state, mission);
+    },
+    // За автоматична проверка: изпълнява n кадъра веднага (и в скрит раздел, където кадрите спират).
+    tick(n = 1) {
+      if (!renderer) return;
+      let now = performance.now();
+      for (let i = 0; i < n; i++) {
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        now += 16.7;
+        frame(now);
+      }
     },
     // За проверка в конзолата: текущото качество.
     debug: () => ({ ...quality, renderer: Boolean(renderer), show3D, fps: Math.round(fpsAverage) }),
