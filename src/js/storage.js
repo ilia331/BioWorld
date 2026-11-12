@@ -163,7 +163,7 @@ async function loadLatestGame() {
 
   const rows = check(
     await db.from("simulation_history")
-      .select("turn_no, snapshot, reason, understanding_points")
+      .select("turn_no, snapshot, event, prediction, reason, understanding_points")
       .eq("simulation_id", simulation.id)
       .order("turn_no"),
     "Зареждане на историята",
@@ -171,5 +171,5 @@ async function loadLatestGame() {
   const history = rows.map((row) => ({ turn: row.turn_no, ...row.snapshot }));
   const last = rows[rows.length - 1] || null;
 
-  return { id: simulation.id, missionNumber: simulation.ecosystems.mission_no, state, history, lastEntry: last };
+  return { id: simulation.id, missionNumber: simulation.ecosystems.mission_no, state, history, entries: rows, lastEntry: last };
 }

@@ -40,7 +40,7 @@ const MISSIONS = [
     title: "Изчезващият хищник",
     goalText: "Трите вида оцеляват и се стабилизират.",
     level: "🌿🌿🌿",
-    locked: true,
+    locked: false,
     initialWater: 60,
     start: { grass: 220, rabbits: 40, foxes: 6 },
     events: { 2: { type: "disease", species: "foxes" } },
@@ -51,7 +51,7 @@ const MISSIONS = [
     title: "Непредвидима година",
     goalText: "Балансът се запазва въпреки събитията.",
     level: "🌿🌿🌿",
-    locked: true,
+    locked: false,
     initialWater: 50,
     start: { grass: 200, rabbits: 25, foxes: 4 },
     events: {

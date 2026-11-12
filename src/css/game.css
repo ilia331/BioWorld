@@ -1,0 +1,243 @@
+/* Игровата обвивка заменя предишната страница с карти; правилата остават в JS. */
+:root { --night:#0c2725; --pine:#153c34; --panel:#173d34; --line:#5c806b; --gold:#efca78; --cream:#f4efda; --aqua:#93d2d4; }
+body { margin:0; background:var(--night); color:var(--cream); }
+body [hidden] { display:none !important; }
+button, input, textarea { font:inherit; }
+button { cursor:pointer; }
+:focus-visible { outline:3px solid #ffd980 !important; outline-offset:3px; }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.top-bar { position:relative; z-index:30; height:66px; box-sizing:border-box; padding:0 22px; background:#0c2928; border:0; box-shadow:0 2px 18px #061b1a80; }
+.top-bar-inner { max-width:none; height:100%; }
+.brand-mark { display:flex; gap:10px; align-items:center; }
+.brand-symbol { display:grid; place-items:center; width:38px; height:38px; border:2px solid var(--gold); border-radius:10px; color:var(--gold); font-size:28px; line-height:1; transform:rotate(-9deg); }
+.top-bar h1 { color:#fff5d5; font-size:1.35rem; line-height:1; }
+.top-bar .subtitle { color:#b7d2c2; font-size:.69rem; letter-spacing:.1em; text-transform:uppercase; }
+.account-buttons button { min-height:36px; border:1px solid #789581; border-radius:7px; padding:5px 12px; background:#173e37; color:#f6edcf; font-size:.8rem; font-weight:700; }
+.account-buttons button:hover { background:#28624d; }
+.container { max-width:none; padding:0; margin:0; }
+.footer { background:#0c2928; color:#a7baa9; }
+body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-screen="missions"] .footer { display:none; }
+.button { border-radius:8px; min-height:46px; padding:10px 20px; font-weight:900; letter-spacing:.03em; }
+.button-primary { color:#17362f; background:linear-gradient(#ffe19a,#d9a847); border:1px solid #fff0b1; box-shadow:0 4px 0 #9a6c32,0 12px 22px #081f1c88; }
+.button-primary:hover:not(:disabled) { background:linear-gradient(#ffebb0,#efbd61); transform:translateY(-2px); }
+.button-primary:disabled { color:#748479; background:#728074; border-color:#8c9e8b; box-shadow:none; }
+.button-secondary { color:#f5edce; background:#1b453b; border:1px solid #6d927a; }
+.button-secondary:hover:not(:disabled) { background:#2a6150; }
+.back-button { color:#e6d49b; border:1px solid #668873; background:#1b4036; border-radius:7px; padding:8px 12px; font-size:.84rem; white-space:nowrap; }
+.back-button:hover { background:#2a5b49; text-decoration:none; }
+.small-text { color:#bdd0bc; }
+
+/* Главно меню: картината заема цялата видима област. */
+#home-screen { position:relative; min-height:calc(100dvh - 66px); }
+.home-hero { position:relative; isolation:isolate; display:block; min-height:calc(100dvh - 66px); border-radius:0; padding:0; box-shadow:none; background:#244e49; overflow:hidden; }
+.home-art { position:absolute; inset:0; width:100%; height:100%; max-height:none; object-fit:cover; object-position:center 57%; filter:saturate(1.13) contrast(1.08); z-index:-2; }
+.home-vignette { position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,#061e1ce8 0%,#092b28c8 28%,#12392e63 54%,#0e30220c 80%),linear-gradient(0deg,#071d1bc0,transparent 42%); }
+.home-copy { position:relative; width:min(540px,50vw); padding:clamp(42px,8vh,100px) 0 48px clamp(26px,5vw,90px); }
+.menu-kicker, .console-kicker { display:block; color:#f1d28a; font-size:.7rem; font-weight:900; letter-spacing:.2em; }
+.home-copy h2 { max-width:none; margin:18px 0 12px; color:#fff5d4; font-size:clamp(2.8rem,4.5vw,5.4rem); line-height:.98; letter-spacing:-.04em; text-shadow:0 4px 22px #0b2928; }
+.home-copy h2 em { color:#f3cd76; }
+.home-copy > p { max-width:420px !important; margin:0 0 25px; color:#e3ebd2 !important; font-size:1rem !important; line-height:1.45; }
+.home-actions { display:grid; width:min(330px,100%); gap:6px; margin:0; }
+.home-actions button { width:100%; text-align:left; }
+.menu-play { min-height:62px; margin-bottom:6px; padding:10px 23px; border:1px solid #ffe6a7; border-radius:8px; color:#18372e; background:linear-gradient(120deg,#ffe29c,#e3ae53); box-shadow:0 5px 0 #9b6f33,0 17px 25px #071c1a66; font-size:1.3rem; font-weight:1000; letter-spacing:.12em; }
+.menu-play:hover { background:#ffe8aa; transform:translateY(-2px); }
+.menu-option { min-height:40px; padding:8px 16px; border:1px solid #9cbca299; border-radius:7px; color:#f7f2d7; background:#153e36c9; font-weight:700; }
+.menu-option span { float:right; color:var(--gold); }
+.menu-option:hover:not(:disabled) { background:#2d6950; }
+.menu-option:disabled { opacity:.45; cursor:not-allowed; }
+.home-corner { position:absolute; right:26px; bottom:26px; color:#f8edc7; font-size:.75rem; font-weight:900; letter-spacing:.18em; text-shadow:0 2px 8px #081d1b; }
+.home-corner span { color:#edc06e; padding:0 6px; }
+.home-help { position:fixed; z-index:35; right:20px; bottom:20px; width:min(320px,calc(100vw - 40px)); color:#e7e9ce; background:#14362ff0; border:1px solid #8eac83; border-radius:8px; box-shadow:0 12px 30px #041917aa; }
+.home-help summary { cursor:pointer; padding:10px 14px; font-size:.8rem; font-weight:700; }
+.home-help p { margin:0; padding:0 14px 14px; font-size:.84rem; line-height:1.45; }
+.home-help:not([open]) { width:auto; }
+.home-help:not([open]) summary { color:#d9e9d0; }
+.home-corner { right:auto; left:44px; }
+
+/* Мисиите са маршрут с една голяма картина, не решетка от карти. */
+#missions-screen { position:relative; min-height:calc(100dvh - 66px); padding:21px 32px 28px; box-sizing:border-box; background:radial-gradient(circle at 70% 25%,#315b49 0,#102e2a 58%,#0a2524 100%); }
+#missions-screen .intro { max-width:none; margin:0 0 19px; }
+#missions-screen .intro .back-button { margin:0 0 10px; }
+#missions-screen .intro .eyebrow { color:#efc775; font-size:.68rem; }
+#missions-screen .intro h2 { margin:0; color:#fff0cb; font-size:clamp(1.65rem,2.7vw,2.7rem); }
+#missions-screen .intro > p:last-child { margin:2px 0 0; color:#c9d9c5; font-size:.88rem; }
+.rules-panel { position:absolute; right:32px; top:25px; z-index:3; width:240px; margin:0; padding:0; color:#e9e9d3; background:#204339; border:1px solid #668974; border-radius:7px; box-shadow:none; }
+.rules-panel summary { color:#eee1b7; padding:10px 13px; font-size:.82rem; }
+.rules-panel summary span { color:#b5c9b7; }
+.rules-panel[open] { width:min(360px,calc(100vw - 30px)); padding-bottom:12px; }
+.rules-panel .rules-list { padding-right:16px; font-size:.78rem; line-height:1.35; }
+.rules-panel .note { padding:0 14px; color:#c6d8bf; font-size:.75rem; }
+.mission-map { display:grid; grid-template-columns:minmax(240px,300px) minmax(0,1fr); gap:20px; height:calc(100dvh - 260px); min-height:410px; }
+.mission-path { min-width:0; padding:15px; border:1px solid #476b58; border-radius:12px; background:#0c2a27e8; }
+.mission-path h3 { margin:0 0 12px; color:#c8d8ba; font-size:.76rem; text-transform:uppercase; letter-spacing:.12em; }
+.mission-list { display:flex; flex-direction:column; gap:4px; }
+.mission-card { min-height:74px; width:100%; display:grid; grid-template-columns:38px 1fr; grid-template-rows:auto auto; align-content:center; gap:1px 11px; padding:8px 11px; color:#e9ead3; background:#183a32; border:1px solid transparent; border-radius:7px; box-shadow:none; }
+.mission-list .mission-card { background:#183a32; }
+.mission-card::before, .mission-card::after { display:none; }
+.mission-card .mission-number { grid-row:1/3; display:grid; place-items:center; width:34px; height:34px; border-radius:50%; color:#f6d182; background:#345a45; font-size:.72rem; }
+.mission-card strong { font-size:.98rem; line-height:1.1; }
+.mission-card .mission-goal { display:none; }
+.mission-card .mission-level { color:#b7cfb9; font-size:.7rem; }
+.mission-card[aria-pressed="true"], .mission-card[aria-pressed="true"]:hover { color:#fff2ce; background:#2e6650; border:1px solid #f2cd78; outline:none; }
+.mission-list .mission-card[aria-pressed="true"] { background:#2e6650; }
+.mission-card:hover:not(:disabled) { transform:translateX(3px); background:#245443; box-shadow:none; }
+.mission-card:disabled { background:#34483f; color:#aeb7a9; opacity:.7; cursor:not-allowed; }
+.mission-detail { position:relative; isolation:isolate; display:flex; align-items:stretch; flex-direction:column; justify-content:space-between; overflow:hidden; border:1px solid #9db38e; border-radius:12px; background:#315b4d; box-shadow:0 18px 35px #061b1a88; }
+.mission-detail::before { content:""; position:absolute; z-index:-2; inset:0; background:url('../../assets/valley-menu.svg') center 53%/cover; filter:saturate(1.15); }
+.mission-detail::after { content:""; position:absolute; z-index:-1; inset:0; background:linear-gradient(0deg,#082723f2 0%,#13352ac9 34%,#18392b19 78%); }
+.mission-detail[data-mission="2"]::before { filter:hue-rotate(29deg) saturate(.8) sepia(.2); }
+.mission-detail[data-mission="3"]::before { filter:sepia(.25) saturate(1.2); }
+.mission-detail[data-mission="4"]::before { filter:hue-rotate(76deg) saturate(.75) brightness(.75); }
+.mission-detail[data-mission="5"]::before { filter:hue-rotate(130deg) saturate(.85); }
+.mission-detail-sky { display:flex; justify-content:space-between; padding:20px 25px; color:#fff3ce; font-weight:900; font-size:.79rem; letter-spacing:.12em; }
+.mission-detail-sky span { background:#123c36b5; padding:7px 10px; border:1px solid #a9bf93; border-radius:6px; }
+.mission-detail-copy { padding:30px clamp(24px,5vw,70px); }
+.mission-detail-copy h3 { margin:8px 0; color:#fff3d0; font-size:clamp(2.3rem,4vw,4.8rem); line-height:1; text-shadow:0 3px 15px #102921; }
+.mission-detail-copy p { max-width:600px; color:#e4e7cc; font-size:1rem; line-height:1.35; }
+.mission-detail .start-actions { margin-top:20px; }
+.mission-detail .button { min-width:190px; }
+
+/* Екранът на хода: фиксирани по височина HUD, долина и контролна конзола. */
+#game-screen { display:grid; grid-template-rows:auto minmax(0,1fr) auto; height:calc(100dvh - 66px); min-height:540px; background:#0a2928; }
+.game-hud { display:grid; grid-template-columns:minmax(320px,.7fr) minmax(0,1.3fr); align-items:center; gap:15px; min-height:100px; padding:8px 20px; box-sizing:border-box; background:linear-gradient(110deg,#112f2d,#1c4438); border-bottom:2px solid #b6985e; }
+.game-heading { display:flex; align-items:center; gap:14px; margin:0; min-width:0; }
+.game-identity { min-width:0; flex:1; }
+.game-identity h2 { margin:0; color:#f9edc8; font-size:clamp(.95rem,1.5vw,1.32rem); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.game-goal { margin:2px 0 0; color:#bad4b9; font-size:.72rem; font-weight:500; line-height:1.25; }
+.turn-badge { flex:none; color:#183a31; background:#f0c774; border-radius:6px; padding:9px 11px; font-size:.88rem; white-space:nowrap; }
+.metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin:0; }
+.metric { display:grid; grid-template-columns:1fr auto; align-content:center; min-width:0; min-height:65px; padding:7px 10px; color:#edf1d9; background:#204739; border:1px solid #5f8a70; border-top:1px solid #5f8a70 !important; border-radius:6px; box-shadow:inset 0 1px #ffffff12; }
+.metric > span:first-child { grid-column:1/3; display:flex; align-items:center; gap:6px; color:#c8dec9; font-size:.73rem; line-height:1; }
+.metric strong { font-size:1.25rem; line-height:1.25; }
+.metric .change { align-self:end; font-size:.77rem; }
+.metric .up { color:#a8e3ab; }.metric .down { color:#ffc183; }.metric .same { color:#b7caba; }
+.metric[data-critical="true"] { border-color:#eda878; box-shadow:inset 0 0 0 1px #b67658; }
+.metric[data-critical="true"] strong { color:#ffd198; }
+.resource-icon { position:relative; display:inline-block; flex:none; width:22px; height:22px; border-radius:5px; background:#2f6d64; }
+.water-icon::before { content:""; position:absolute; width:10px; height:14px; left:6px; top:3px; background:#8cdae4; border-radius:80% 5% 60% 60%; transform:rotate(45deg); }
+.grass-icon { background:#366d4d; }.grass-icon::before { content:""; position:absolute; left:10px; top:4px; width:2px; height:15px; background:#c5d986; box-shadow:-4px 2px #c5d986,4px 2px #c5d986; transform:skew(-15deg); }
+.rabbit-icon { background:#6a7058; }.rabbit-icon::before { content:""; position:absolute; left:5px; top:9px; width:13px; height:9px; border-radius:50%; background:#f0e1c6; }.rabbit-icon::after { content:""; position:absolute; left:13px; top:2px; width:3px; height:10px; border-radius:50%; background:#f0e1c6; box-shadow:4px 0 #f0e1c6; }
+.fox-icon { background:#765548; }.fox-icon::before { content:""; position:absolute; left:4px; top:8px; border-left:8px solid transparent; border-right:8px solid transparent; border-top:10px solid #e5a36b; }.fox-icon::after { content:""; position:absolute; left:6px; top:4px; border-left:4px solid transparent; border-right:4px solid transparent; border-bottom:9px solid #d7865c; box-shadow:6px 0 #d7865c; }
+.none-icon { background:#4f6653; }.none-icon::before { content:"·"; position:absolute; inset:-11px 0 0; color:#d4ddbd; font-size:33px; text-align:center; }
+.game-stage { display:grid; grid-template-columns:minmax(0,1fr) minmax(330px,350px); min-height:0; }
+#game-screen[data-phase="feedback"] .game-stage { grid-template-columns:1fr; }
+#game-screen[data-phase="feedback"] .game-console { display:none; }
+.scene-card { position:relative; min-width:0; min-height:0; margin:0; padding:0; overflow:hidden; border:0; border-radius:0; background:#517c69; }
+.valley-scene { display:block; width:100%; height:100%; max-height:none; border-radius:0; background:#88b2aa; }
+.scene-topline, .scene-bottomline { position:absolute; z-index:2; left:14px; right:14px; display:flex; justify-content:space-between; align-items:center; gap:8px; color:#f6efce; text-shadow:0 2px 8px #0a302a; font-size:.76rem; }
+.scene-topline { top:13px; }.scene-bottomline { bottom:13px; }
+.scene-topline h3 { margin:0; color:#fff2cd; font-size:.83rem; letter-spacing:.12em; text-transform:uppercase; }
+.event-label { color:#fff0cf; background:#143e38c9; border:1px solid #9ebc97; border-radius:5px; padding:6px 9px; }
+.scene-scale { letter-spacing:.13em; font-weight:800; }
+.scene-clouds { animation:cloud-drift 16s ease-in-out infinite alternate; }.river-motion { animation:river-glint 6s ease-in-out infinite alternate; }.animal-motion { animation:animal-breathe 4s ease-in-out infinite alternate; }
+.valley-scene[data-event="drought"] { filter:sepia(.28) saturate(.78); }.valley-scene[data-event="disease"] { filter:saturate(.65); }
+@keyframes cloud-drift { to { transform:translateX(24px); } }@keyframes river-glint { to { opacity:.28; } }@keyframes animal-breathe { to { transform:translateY(-3px); } }
+.game-console { display:flex; flex-direction:column; min-height:0; overflow:auto; padding:14px 15px 10px; background:linear-gradient(#173b34,#0e302c); border-left:2px solid #a38c5d; scrollbar-color:#70987a #163a33; }
+.phase-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin:0 0 13px; }
+.phase-bar span { padding:7px 2px; color:#b6cbbb; background:#285347; border:1px solid #56816a; border-radius:4px; font-size:.62rem; letter-spacing:.03em; }
+.phase-bar span:first-child, .phase-bar[data-phase="prediction"] span:nth-child(2), .phase-bar[data-phase="execute"] span:nth-child(3) { color:#1b392f; background:#e9c47a; border-color:#f7dd9d; }
+.phase-bar[data-phase="prediction"] span:first-child, .phase-bar[data-phase="execute"] span:first-child { color:#b6cbbb; background:#285347; border-color:#56816a; }
+.controls-grid { display:block; min-height:0; flex-shrink:0; }
+.controls-grid > .card { min-height:0; margin:0; padding:0; color:#f2ecd4; background:transparent; border:0; border-radius:0; box-shadow:none; }
+.controls-grid h3 { margin:5px 0 4px; color:#fff0c6; font-size:1.33rem; line-height:1.15; }
+.controls-grid .small-text { color:#bad2c0; font-size:.79rem; }
+#game-screen[data-phase="action"] #prediction-panel, #game-screen[data-phase="action"] .next-area, #game-screen[data-phase="feedback"] .controls-grid, #game-screen[data-phase="feedback"] .next-area { display:none; }
+#game-screen[data-phase="action"] .selected-action { display:none; }
+#game-screen[data-phase="prediction"] #action-panel .action-list, #game-screen[data-phase="prediction"] #action-panel > .small-text, #game-screen[data-phase="prediction"] #action-reasons, #game-screen[data-phase="prediction"] #action-message { display:none; }
+#game-screen[data-phase="prediction"] #action-panel { margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #668874; }
+#game-screen[data-phase="prediction"] #action-panel .console-kicker, #game-screen[data-phase="prediction"] #action-panel h3 { display:none; }
+.selected-action { display:flex; justify-content:space-between; align-items:center; gap:6px; padding:8px 10px; color:#ffe0a1; background:#315b46; border:1px solid #a7a67b; border-radius:5px; font-size:.81rem; font-weight:800; }
+.selected-action button { flex:none; border:0; color:#f3e1ad; background:none; font-size:.75rem; }
+.action-list { display:grid; gap:6px; margin:12px 0 8px; }
+.action-list button { display:grid; grid-template-columns:30px 1fr; grid-template-rows:auto auto; align-items:center; gap:1px 8px; min-height:50px; padding:6px 9px; color:#f4f0da; background:#245044; border:1px solid #668c72; border-radius:6px; text-align:left; transition:transform .15s,background .15s; }
+.action-list button .resource-icon { grid-row:1/3; }
+.action-list button span { font-size:.82rem; font-weight:800; }
+.action-list button small { color:#c8d8bc; font-size:.68rem; white-space:normal; }
+.action-list button:hover:not(:disabled) { background:#356b50; transform:translateX(3px); }
+.action-list button[aria-pressed="true"] { color:#193b30; background:#ebcc88; border-color:#fff2bd; }
+.action-list button[aria-pressed="true"] small { color:#315445; }
+.action-list button:disabled { color:#9bad9f; background:#263c36; border-color:#456455; cursor:not-allowed; }
+.action-list button:disabled small { color:#9bad9f; }
+.action-reason { margin:7px 0 0; padding:7px 9px; color:#f9cd9b; background:#543f31; border-radius:5px; font-size:.71rem; }
+#action-reasons:empty { display:none; }
+#action-reasons:not(:empty) { max-height:49px; overflow:auto; }
+#action-message { margin:6px 0 0; }
+.prediction-list { margin:9px 0; }
+.prediction-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #527a65; color:#ecedcf; font-size:.83rem; font-weight:700; }
+.choice-group button { width:40px; min-width:40px; min-height:35px; margin-left:4px; color:#f3ecd5; background:#285345; border:1px solid #6f9678; border-radius:5px; font-weight:900; }
+.choice-group button:hover { background:#397251; }
+.choice-group button[aria-pressed="true"] { color:#183a2f; background:#f2d081; border-color:#fff0b3; }
+.reason-details { margin:8px 0; color:#c3d6be; font-size:.76rem; }
+.reason-details summary { cursor:pointer; }
+.reason-details textarea { min-height:50px; margin-top:5px; color:#f5eed6; background:#10332f; border:1px solid #77917a; }
+.next-area { flex-shrink:0; margin:auto 0 0; padding:12px 0 0; text-align:center; }
+.next-area .button { width:100%; min-height:48px; font-size:.89rem; }
+.next-area .small-text { margin-top:7px; min-height:20px; font-size:.72rem; }
+.console-status { margin-top:6px; }
+.state-banner { margin:0; padding:5px; color:#c5d9be; background:transparent; font-size:.68rem; font-weight:500; text-align:center; }
+.state-banner[data-state="ready"] { display:none; }
+.state-banner[data-state="error"] { color:#ffd29e; background:#583e32; }
+.state-banner[data-state="loading"] { color:#b8dcee; background:#234253; }
+.game-dock { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:45px; padding:5px 18px; background:#0b2726; border-top:1px solid #789072; }
+.dock-tools { display:flex; gap:8px; }
+.dock-tools button { padding:7px 13px; color:#f1e6bf; background:#214a3d; border:1px solid #6d8e70; border-radius:5px; font-size:.82rem; font-weight:700; }
+.dock-tools button:hover { background:#367053; }
+.game-dock .demo-note { margin:0; padding:0; color:#b8cdb9; background:none; border:0; font-size:.71rem; }
+.turn-feedback { position:absolute; z-index:5; left:50%; top:50%; width:min(510px,calc(100% - 38px)); max-height:calc(100% - 40px); overflow:auto; transform:translate(-50%,-50%); padding:22px 26px; color:#f7efd2; background:#102e2af2; border:1px solid #d7bb7c; border-radius:10px; box-shadow:0 20px 70px #041c1bc9; text-align:center; }
+.turn-feedback h3 { margin:8px 0 12px; color:#ffe5a4; font-size:1.5rem; }.turn-feedback p { margin:7px 0; line-height:1.4; }.turn-feedback .button { margin-top:13px; }
+.game-overlay { position:fixed; z-index:50; inset:0; display:flex; justify-content:flex-end; background:#041b1bd9; }
+.overlay-panel { width:min(620px,100vw); height:100dvh; box-sizing:border-box; overflow:auto; padding:22px; color:#f0edd4; background:#153a33; border-left:2px solid #d4b77b; box-shadow:-20px 0 50px #0419169c; }
+.overlay-heading { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:20px; }.overlay-heading h3 { margin:0; color:#ffe2a0; font-size:1.5rem; }.overlay-heading button { width:36px; height:36px; color:#f8edce; background:#305b47; border:1px solid #9fb790; border-radius:5px; }
+.history-grid { display:block; }.history-grid .card { margin:0; padding:0; color:#f2edcf; background:transparent; border:0; box-shadow:none; }.history-grid h3 { color:#f7dfaa; }
+.chart-box { height:360px; background:#f4f4e7; border-radius:8px; padding:10px; box-sizing:border-box; }
+#diary { max-height:none; padding-left:0; border:0; }.diary-turn { padding:10px; margin:7px 0; background:#214b3e; border:1px solid #61846c; border-radius:7px; }.diary-turn summary { color:#f8e3ad; background:none; }.diary-table th,.diary-table td { color:#e7e8d0; border-color:#66856b; }.diary-why { color:#f9dda3; }.diary-reasons { color:#e1e5cc; }
+
+/* Край на мисия: самостоятелен игрови екран. */
+#result-screen { min-height:calc(100dvh - 66px); padding:30px 20px; box-sizing:border-box; background:radial-gradient(circle at 72% 12%,#3d664b,#0f302c 64%); }
+.result-card { max-width:970px; margin:0 auto; padding:28px 38px; color:#f3ecd2; background:#183d34; border:1px solid #a4a573; border-radius:12px; box-shadow:0 24px 60px #041a19a8; }
+.result-card > h2 { margin:3px 0; color:#f7d58e; font-size:clamp(2rem,4vw,3.6rem); }.result-card > h3 { color:#f3dfa9; }.result-card .small-text { color:#c3d5bd; }
+.result-resources span { color:#f3edce; background:#2a5846; border:1px solid #678a6b; }.result-list li { border-color:#6a866b; }.result-points { color:#f7e1a7; background:#2a5846; }.result-reflection { color:#f4e8c8; background:#315541; }
+.result-card .chart-box { height:260px; }.result-card .start-actions { margin-top:18px; }
+
+/* Входът е самостоятелен панел над играта. */
+.auth-panel { position:fixed; z-index:60; right:18px; top:73px; width:min(390px,calc(100vw - 36px)); box-sizing:border-box; max-height:calc(100dvh - 88px); overflow:auto; padding:20px; color:#f3ecd5; background:#173c34; border:1px solid #b6ab78; border-radius:9px; box-shadow:0 20px 50px #031917bb; }
+.auth-panel input { background:#eef1e2; }.auth-panel .small-text { color:#c6d5be; }
+
+@media (max-width:1050px) {
+  .game-hud { grid-template-columns:1fr; gap:5px; padding:7px 12px; }
+  .game-heading { justify-content:space-between; }
+  .metric { min-height:48px; }
+  .game-stage { grid-template-columns:minmax(0,1fr) 315px; }
+}
+@media (min-width:701px) and (max-width:1050px) and (orientation:portrait) {
+  .game-stage { display:flex; flex-direction:column; }
+  .scene-card { flex:1 1 auto; min-height:0; }
+  .game-console { flex:0 0 375px; min-height:0; overflow:auto; border-left:0; border-top:2px solid #bda066; }
+  .action-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .action-list button:last-child { grid-column:1/3; }
+  .controls-grid h3 { font-size:1.05rem; }
+  #game-screen[data-phase="prediction"] .game-console { flex-basis:440px; }
+  #game-screen[data-phase="prediction"] #action-panel { margin-bottom:4px; padding-bottom:4px; }
+  #game-screen[data-phase="prediction"] .prediction-list { margin:5px 0; }
+  #game-screen[data-phase="prediction"] .prediction-row { padding:2px 0; }
+  #game-screen[data-phase="prediction"] .choice-group button { min-height:33px; }
+  #game-screen[data-phase="prediction"] .reason-details { margin:4px 0; }
+  #game-screen[data-phase="prediction"] .next-area .small-text { display:none; }
+}
+@media (max-width:700px) {
+  .top-bar { height:56px; padding:0 12px; }.top-bar-inner { flex-direction:row; align-items:center; justify-content:space-between; }.brand-symbol { width:29px; height:29px; font-size:20px; }.top-bar h1 { font-size:1.04rem; }.top-bar .subtitle { font-size:.57rem; }.account-buttons { margin:0; }.account-buttons button { min-height:32px; font-size:.68rem; padding:4px 7px; }.account-name { display:none; }
+  #home-screen,.home-hero { min-height:calc(100dvh - 56px); }.home-art { object-position:60% center; }.home-vignette { background:linear-gradient(0deg,#071d1bf7 0%,#0b2d29d8 48%,#1b453422 100%); }.home-copy { position:absolute; bottom:45px; left:0; width:100%; box-sizing:border-box; padding:18px 23px; }.home-copy h2 { font-size:clamp(2.1rem,9vw,3.5rem); }.home-copy > p { font-size:.88rem !important; margin-bottom:17px; }.home-actions { width:100%; gap:5px; }.menu-play { min-height:52px; }.menu-option { min-height:36px; }.home-corner { display:none; }.home-help { bottom:4px; right:8px; }
+  #missions-screen { min-height:calc(100dvh - 56px); padding:14px 12px 25px; }.rules-panel { right:12px; top:15px; width:auto; }.rules-panel summary span { display:none; }.mission-map { height:auto; min-height:0; grid-template-columns:1fr; gap:12px; }.mission-path { padding:10px; }.mission-list { display:grid; grid-template-columns:1fr; }.mission-card { min-height:58px; }.mission-detail { min-height:370px; }.mission-detail-copy { padding:25px; }.mission-detail-copy h3 { font-size:2.5rem; }
+  #game-screen { height:calc(100dvh - 56px); min-height:640px; grid-template-rows:auto minmax(0,1fr) auto; overflow:hidden; }.game-hud { gap:7px; padding:8px; }.game-heading { gap:6px; }.game-identity h2 { font-size:.91rem; }.game-goal { font-size:.65rem; }.turn-badge { font-size:.68rem; padding:7px; }.back-button { font-size:.72rem; padding:7px; }.metrics { grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }.metric { min-height:50px; padding:5px 4px; }.metric > span:first-child { font-size:.62rem; gap:2px; }.metric .resource-icon { width:15px; height:15px; transform:scale(.7); transform-origin:left center; margin-right:-4px; }.metric strong { font-size:.94rem; }.metric .change { font-size:.62rem; }
+  .game-stage { display:flex; flex-direction:column; min-height:0; }.scene-card { flex:1 1 auto; height:auto; min-height:0; }.scene-scale { display:none; }.scene-bottomline { font-size:.67rem; }.game-console { flex:0 0 min(390px,48dvh); min-height:0; max-height:none; overflow:auto; padding:7px 14px 8px; border-left:0; border-top:2px solid #bda066; border-radius:13px 13px 0 0; box-shadow:0 -8px 25px #08261e77; }.phase-bar { margin-bottom:5px; }.action-list { grid-template-columns:repeat(2,minmax(0,1fr)); }.action-list button { min-height:62px; }.action-list button:last-child { grid-column:1/3; }.next-area { margin-top:5px; }.game-dock { padding:5px 8px; min-height:42px; }.dock-tools button { min-height:34px; padding:4px 7px; font-size:.72rem; white-space:nowrap; }.game-dock .demo-note { max-width:50%; text-align:right; font-size:.6rem; line-height:1.12; }.turn-feedback { padding:15px; }.turn-feedback h3 { font-size:1.12rem; }.turn-feedback p { font-size:.72rem; }
+  #game-screen[data-phase="prediction"] #action-panel { margin-bottom:4px; padding-bottom:4px; }
+  #game-screen[data-phase="prediction"] .game-console { flex-basis:min(420px,52dvh); }
+  #game-screen[data-phase="prediction"] .prediction-list { margin:5px 0; }
+  #game-screen[data-phase="prediction"] .prediction-row { padding:2px 0; }
+  #game-screen[data-phase="prediction"] .choice-group button { min-height:31px; width:35px; min-width:35px; }
+  #game-screen[data-phase="prediction"] .reason-details { margin:4px 0; }
+  #game-screen[data-phase="prediction"] .next-area .small-text { display:none; }
+  .overlay-panel { padding:16px; }.chart-box { height:300px; }.result-card { padding:20px; }.result-resources { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:380px) { .mission-detail-copy h3 { font-size:2.1rem; }.metric strong { font-size:.82rem; }.metric > span:first-child { font-size:.58rem; }.top-bar .subtitle { letter-spacing:0; } }
+@media (prefers-reduced-motion:reduce) { .scene-clouds,.river-motion,.animal-motion { animation:none !important; } * { scroll-behavior:auto !important; transition-duration:.01ms !important; } }

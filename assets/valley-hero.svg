@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" role="img" aria-labelledby="title">
+  <title id="title">Жива речна долина</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#90c7c4"/><stop offset="1" stop-color="#e6dcab"/></linearGradient>
+    <linearGradient id="water" x2="0" y2="1"><stop stop-color="#a7dce1"/><stop offset="1" stop-color="#2c8393"/></linearGradient>
+    <linearGradient id="hill" x2="0" y2="1"><stop stop-color="#7da578"/><stop offset="1" stop-color="#365b46"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+    <g id="tree"><path d="M0 0v52" stroke="#3e4632" stroke-width="10"/><path d="M0-72c-35 8-48 48-26 68 8 14 44 21 59 4 24-27 7-63-33-72Z" fill="#255b47"/><path d="M-5-67c-24 9-38 34-27 54" fill="none" stroke="#72a777" stroke-width="7" opacity=".6"/></g>
+    <g id="rabbit"><ellipse cx="0" cy="17" rx="25" ry="17" fill="#eee3ca"/><circle cx="19" cy="5" r="13" fill="#eee3ca"/><ellipse cx="14" cy="-18" rx="5" ry="25" fill="#eee3ca" transform="rotate(-10 14 -18)"/><ellipse cx="26" cy="-18" rx="5" ry="23" fill="#eee3ca" transform="rotate(12 26 -18)"/><circle cx="24" cy="3" r="2" fill="#283f31"/><circle cx="-21" cy="8" r="8" fill="#f7f0dd"/></g>
+    <g id="fox"><path d="M-34 20Q-62 4-74-13Q-64 32-35 38Z" fill="#b96e46"/><path d="M-38 15Q-21-8 17-6L40 20Q23 41-20 38Z" fill="#bd7148"/><path d="M11-2 27-30 32 4 48-26 52 13 43 27 19 24Z" fill="#bd7148"/><path d="M37 26 48 21 44 31Z" fill="#f0dfbc"/><circle cx="39" cy="10" r="2.5" fill="#1e302c"/></g>
+  </defs>
+  <rect width="800" height="620" rx="34" fill="url(#sky)"/>
+  <circle cx="607" cy="124" r="63" fill="#f9d488"/><circle cx="607" cy="124" r="94" fill="#fff2c7" opacity=".35" filter="url(#soft)"/>
+  <path d="M0 317Q113 184 259 268Q381 160 519 247Q675 148 800 294V620H0Z" fill="#a9bb90"/>
+  <path d="M0 357Q157 253 282 327Q408 236 559 310Q691 234 800 338V620H0Z" fill="url(#hill)"/>
+  <path d="M0 428Q148 353 337 393Q528 348 800 405V620H0Z" fill="#4d7753"/>
+  <use href="#tree" transform="translate(77 329) scale(.8)"/><use href="#tree" transform="translate(137 347) scale(1.1)"/><use href="#tree" transform="translate(222 360) scale(.7)"/>
+  <use href="#tree" transform="translate(584 347) scale(.8)"/><use href="#tree" transform="translate(676 358) scale(1.05)"/><use href="#tree" transform="translate(754 374) scale(.74)"/>
+  <path d="M0 490Q141 433 266 487Q388 543 492 462Q630 375 800 457V620H0Z" fill="#658c56"/>
+  <path d="M0 558Q125 477 249 513Q400 563 487 504Q626 403 800 478V620H0Z" fill="url(#water)"/>
+  <path d="M0 558Q125 477 249 513Q400 563 487 504Q626 403 800 478" fill="none" stroke="#d1efec" stroke-width="8" opacity=".7"/>
+  <path d="M0 587Q125 518 242 546Q405 596 509 532Q638 445 800 510" fill="none" stroke="#2d6959" stroke-width="18" opacity=".35"/>
+  <g fill="#bed08b" opacity=".85"><path d="m344 462-13-29 16 17 11-31-3 39m37 8-10-32 16 23 14-28-4 38m175 65-12-32 18 20 11-34-4 41m81 6-13-29 17 18 12-29-4 38"/></g>
+  <use href="#rabbit" transform="translate(348 443) scale(1.05)"/><use href="#rabbit" transform="translate(431 414) scale(.8)"/>
+  <use href="#fox" transform="translate(644 438) scale(1.15)"/>
+  <path d="M25 576Q173 537 294 577" fill="none" stroke="#c9d58e" stroke-width="18" opacity=".65"/>
+  <path d="M0 0h800v620H0z" fill="none" stroke="#f4e8bf" stroke-width="12" opacity=".35"/>
+</svg>
