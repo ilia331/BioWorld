@@ -253,3 +253,56 @@ body[data-screen="home"] .footer, body[data-screen="game"] .footer, body[data-sc
 .scene3d-tip { position:absolute; z-index:3; display:flex; align-items:flex-start; gap:7px; width:230px; margin:0; padding:9px 11px; color:#f7efd2; background:#102e2af2; border:1px solid #d7bb7c; border-radius:7px; font-size:.78rem; line-height:1.3; box-shadow:0 10px 26px #031917aa; pointer-events:none; }
 @media (max-width:700px) { .view-toggle { font-size:.66rem; padding:4px 7px; } .scene-tools .event-label { font-size:.66rem; } .scene3d-tip { width:200px; font-size:.7rem; padding:7px 9px; } }
 .scene3d-fps { position:absolute; z-index:3; right:10px; bottom:38px; padding:3px 7px; border-radius:4px; color:#f0c774; background:#0c2725d9; font:700 .7rem/1.2 monospace; }
+
+/* ---------- 3D интерактивност (scene3d.js) ---------- */
+.valley-3d canvas:focus-visible { outline:3px solid #f0c774; outline-offset:-3px; }
+.scene3d-layer { position:absolute; inset:0; z-index:2; pointer-events:none; }
+.scene3d-layer > * { pointer-events:auto; }
+.scene3d-label { position:absolute; left:0; top:0; pointer-events:none !important; white-space:nowrap; display:flex; align-items:center; gap:5px; padding:4px 8px; border-radius:6px; font-size:.78rem; font-weight:800; line-height:1.15; text-shadow:none; }
+.scene3d-label .resource-icon { width:18px; height:18px; }
+/* E. Изскачащи числа — цветове като при показателите горе (.metric .up / .down). */
+.scene3d-delta { color:#0f2b27; background:#a8e3ab; box-shadow:0 6px 16px #04161488; animation:scene3d-pop 2.4s ease-out forwards; }
+.scene3d-delta.down { background:#ffc183; }
+@keyframes scene3d-pop { 0% { opacity:0; translate:0 10px; } 12% { opacity:1; translate:0 0; } 75% { opacity:1; translate:0 -22px; } 100% { opacity:0; translate:0 -34px; } }
+/* B. Призрачен preview: прозрачен, с пунктир — „може би“, а не реалност. */
+.scene3d-ghost { display:grid; grid-template-columns:auto auto; column-gap:6px; align-items:center; color:#f4efda; background:#0c2725b3; border:1px dashed #f4efdaaa; }
+.scene3d-ghost .resource-icon { grid-row:1 / 3; }
+.scene3d-ghost strong { display:flex; align-items:center; gap:4px; font-size:.86rem; }
+.scene3d-ghost.up strong { color:#c6efc4; }.scene3d-ghost.down strong { color:#ffd3a3; }
+.scene3d-ghost small { font-size:.62rem; font-weight:600; opacity:.85; }
+.scene3d-chip { position:absolute; left:12px; top:50px; margin:0; padding:5px 9px; border:1px dashed #f4efda99; border-radius:5px; color:#f4efda; background:#0c2725cc; font-size:.7rem; }
+/* C. Надписи на стрелките. */
+.scene3d-link { color:#183a31; background:#f0c774e6; font-size:.68rem; padding:3px 7px; }
+.scene3d-link.is-soft { color:#f0c774; background:#0c2725cc; border:1px solid #f0c77488; }
+/* A. Обяснителна карта. */
+.scene3d-card { position:absolute; left:0; top:0; z-index:4; width:min(300px, calc(100% - 16px)); box-sizing:border-box; padding:13px 14px 11px; color:#f4efda; background:#102e2af5; border:1px solid #f0c774; border-radius:9px; box-shadow:0 18px 40px #031917cc; font-size:.8rem; line-height:1.4; }
+.scene3d-card h4 { display:flex; align-items:center; gap:8px; margin:0 26px 4px 0; color:#f9edc8; font-size:1rem; }
+.scene3d-card p { margin:0 0 6px; }
+.scene3d-card-value { color:#f0c774; font-weight:800; font-size:.95rem; }
+.scene3d-card-chain { padding-top:6px; border-top:1px solid #5c806b; color:#c8dec9; font-size:.72rem; }
+.scene3d-card-close { position:absolute; right:8px; top:8px; width:28px; height:28px; padding:0; color:#f4efda; background:transparent; border:1px solid #5c806b; border-radius:6px; font-size:1.1rem; line-height:1; }
+.scene3d-card.is-sheet { position:fixed; left:0; right:0; top:auto; bottom:0; z-index:70; width:auto; max-height:45dvh; overflow:auto; transform:none !important; border-radius:14px 14px 0 0; border-width:2px 0 0; padding:16px 18px calc(14px + env(safe-area-inset-bottom)); }
+/* F. Балонче за времето. */
+.scene3d-bubble { position:absolute; left:50%; top:52px; transform:translateX(-50%); width:min(440px, calc(100% - 24px)); box-sizing:border-box; margin:0; padding:9px 12px; color:#f7efd2; background:#102e2aee; border:1px solid #d7bb7c; border-radius:8px; font-size:.8rem; line-height:1.35; text-align:center; animation:scene3d-fade-in .35s ease-out; }
+@keyframes scene3d-fade-in { from { opacity:0; } to { opacity:1; } }
+/* D. Лента с ходовете. */
+.scene3d-timeline { position:absolute; left:14px; right:14px; bottom:40px; display:flex; align-items:center; gap:8px; padding:6px 10px; color:#f4efda; background:#0c2725d9; border:1px solid #5c806b; border-radius:7px; font-size:.72rem; }
+.scene3d-timeline input { flex:1; min-width:60px; accent-color:#f0c774; }
+.scene3d-timeline output { min-width:76px; text-align:right; font-weight:700; }
+.scene3d-timeline button { padding:3px 9px; color:#183a31; background:#f0c774; border:0; border-radius:4px; font-weight:800; font-size:.7rem; }
+.scene3d-timeline button:disabled { opacity:.45; }
+.valley-3d.is-past canvas { filter:sepia(.25) saturate(.85); }
+.scene3d-fps { bottom:auto; top:50px; right:10px; }
+@media (max-width:700px) {
+  .scene3d-timeline { left:8px; right:8px; bottom:6px; padding:4px 7px; gap:6px; font-size:.64rem; }
+  .scene3d-timeline label { display:none; }
+  .scene-card:has(.valley-3d:not([hidden])) .scene-bottomline { display:none; }
+  .scene3d-bubble { top:44px; font-size:.7rem; padding:6px 9px; }
+  .scene3d-chip { top:44px; font-size:.62rem; }
+  .scene3d-label { font-size:.66rem; padding:3px 6px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .scene3d-delta { animation:scene3d-fade 2.4s linear forwards; }
+  .scene3d-bubble { animation:none; }
+}
+@keyframes scene3d-fade { 0%, 80% { opacity:1; } 100% { opacity:0; } }
