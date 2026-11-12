@@ -17,9 +17,19 @@
   <script src="src/js/storage.js" defer></script>
   <script src="src/js/historyChart.js" defer></script>
   <script src="src/js/main.js" defer></script>
-  <!-- 3D долина: Three.js r149 (последната версия с обикновен скрипт, без import и без предупреждения) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" defer></script>
-  <script src="src/js/scene3d.js" defer></script>
+  <!-- 3D долина: Three.js r186 от CDN чрез importmap (без npm и без build).
+       Последният ред пренасочва вътрешния импорт към минифицирания файл (~195 KB gzip общо). -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.min.js"
+      }
+    }
+  </script>
+  <!-- type="module" също се изпълнява след парсването, в реда на документа — след main.js -->
+  <script type="module" src="src/js/scene3d.js"></script>
 </head>
 <body>
   <header class="top-bar">
