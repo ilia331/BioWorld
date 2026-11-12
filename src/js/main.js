@@ -209,6 +209,8 @@ function renderGame(previous) {
   }
   renderActions();
   renderScene(s);
+  // 3D долината (scene3d.js) показва същото състояние. Ако я няма, остава SVG картинката.
+  if (window.Scene3D) window.Scene3D.update(s, previous ? game.entries.at(-1).event : null, { instant: !previous });
   if (!gameOverlay.hidden && !document.getElementById("history-panel").hidden) drawGameChart();
 }
 
