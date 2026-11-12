@@ -17,6 +17,9 @@
   <script src="src/js/storage.js" defer></script>
   <script src="src/js/historyChart.js" defer></script>
   <script src="src/js/main.js" defer></script>
+  <!-- 3D долина: Three.js r149 (последната версия с обикновен скрипт, без import и без предупреждения) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" defer></script>
+  <script src="src/js/scene3d.js" defer></script>
 </head>
 <body>
   <header class="top-bar">
@@ -120,7 +123,9 @@
 
       <div class="game-stage">
         <section class="scene-card" aria-labelledby="scene-title">
-          <div class="scene-topline"><h3 id="scene-title">Живата долина</h3><span id="event-label" class="event-label">Без събитие</span></div>
+          <div class="scene-topline"><h3 id="scene-title">Живата долина</h3><span class="scene-tools"><span id="event-label" class="event-label">Без събитие</span>
+            <!-- scene3d.js показва бутона само ако има WebGL; иначе остава 2D картинката -->
+            <button id="view-toggle" class="view-toggle" type="button" aria-controls="valley-3d" aria-label="Покажи 3D долината" hidden>3D</button></span></div>
           <svg id="valley-scene" class="valley-scene" viewBox="0 0 1000 590" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Илюстрация на долина с водоем, трева, зайци и лисица">
             <defs>
               <linearGradient id="sky-gradient" x2="0" y2="1"><stop stop-color="#568b9b"/><stop offset=".6" stop-color="#b9d9bd"/><stop offset="1" stop-color="#e9d39b"/></linearGradient>
@@ -151,6 +156,7 @@
             <g id="scene-rain" stroke="#d7f1ef" stroke-width="5" stroke-linecap="round" style="display:none"><path d="m117 38-14 37m102-43-14 37m104 2-14 37m99-63-14 37m101-7-14 37m98-53-14 37m106 5-14 37m103-51-14 37m105-19-14 37"/></g>
             <path d="M0 590v-65q139-35 269 3l-61 62Z" fill="#1b453a" opacity=".72"/><use href="#round-tree" transform="translate(45 580) scale(1.33)"/><use href="#pine-tree" transform="translate(944 560) scale(1.18)"/>
           </svg>
+          <div id="valley-3d" class="valley-3d" hidden></div>
           <div class="scene-bottomline"><span id="scene-caption">Вода 60 · Трева 200 · Зайци 20 · Лисици 4</span><span class="scene-scale">ДОЛИНА 01 / НАБЛЮДЕНИЕ</span></div>
           <div id="turn-feedback" class="turn-feedback" role="dialog" aria-labelledby="feedback-title" hidden><span class="eyebrow">ПОСЛЕДИЦИ ОТ ХОДА</span><h3 id="feedback-title">Долината се промени</h3><p id="feedback-changes"></p><p id="feedback-cause"></p><button id="feedback-continue" class="button button-primary" type="button">▶ ПРОДЪЛЖИ</button></div>
         </section>
