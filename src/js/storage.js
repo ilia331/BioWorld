@@ -31,8 +31,21 @@ function initStorage() {
 
 // Хвърля грешка с разбираем текст, ако Supabase е върнал грешка.
 function check(result, what) {
-  if (result.error) throw new Error(`${what}: ${result.error.message}`);
+  if (result.error) throw new Error(`${what}: ${friendlyError(result.error.message)}`);
   return result.data;
+}
+
+// Съобщенията от Supabase са на английски. Най-честите превеждаме, за да са ясни за ученика.
+// Непознатите остават както са (по-добре английски текст, отколкото скрита грешка).
+function friendlyError(message) {
+  const text = String(message || "");
+  if (/failed to fetch|networkerror|load failed/i.test(text)) return "няма връзка с базата данни. Можеш да играеш, но играта няма да се запише.";
+  if (/invalid login credentials/i.test(text)) return "грешен имейл или парола.";
+  if (/already registered/i.test(text)) return "този имейл вече е регистриран. Използвай „Вход“.";
+  if (/email not confirmed/i.test(text)) return "имейлът още не е потвърден. Отвори линка в писмото от Supabase.";
+  if (/password should be at least/i.test(text)) return "паролата трябва да е поне 6 знака.";
+  if (/rate limit/i.test(text)) return "твърде много опити. Изчакай малко и опитай пак.";
+  return text;
 }
 
 // ---------- Вход и регистрация ----------
