@@ -54,6 +54,7 @@ SQL файловете за стъпка 4 са в `database/`. Илия ги п
 | [docs/AI_USAGE.md](docs/AI_USAGE.md) | Как използваме ИИ |
 | [LICENSE](LICENSE) | Лиценз MIT |
 | [WEEK_1_REPORT.md](WEEK_1_REPORT.md) | Отчет за първата седмица |
+| [WEEK_2_REPORT.md](WEEK_2_REPORT.md) | Отчет за втората седмица |
 
 ## Технологии
 
